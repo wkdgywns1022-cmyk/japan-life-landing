@@ -1,15 +1,31 @@
 "use client";
 
-import { IconChevron, IconToday } from "../icons";
+import { useEffect, useState } from "react";
+import { IconCheck, IconChevron, IconToday } from "../icons";
 import { useLocale } from "../LocaleProvider";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./ChecklistScreen.module.css";
 
-export default function ChecklistScreen() {
+type Props = {
+  demo?: boolean;
+  active?: boolean;
+};
+
+export default function ChecklistScreen({ demo = false, active = false }: Props) {
   const { t, locale } = useLocale();
   const c = t.phone.checklist;
   const showJa = locale !== "ja";
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!demo || !active || done) return;
+    const id = window.setTimeout(() => setDone(true), 900);
+    return () => window.clearTimeout(id);
+  }, [demo, active, done]);
+
+  const progressCount = done ? c.progressCountDone : c.progressCount;
+  const progressPercent = done ? c.progressPercentDone : c.progressPercent;
 
   return (
     <div className={styles.root}>
@@ -24,26 +40,37 @@ export default function ChecklistScreen() {
           <div className={styles.progressHead}>
             <div>
               <p className={styles.progressTitle}>{c.progressTitle}</p>
-              <p className={styles.progressCount}>{c.progressCount}</p>
+              <p className={styles.progressCount}>{progressCount}</p>
             </div>
-            <span className={styles.badge}>{c.progressPercent}</span>
+            <span className={styles.badge}>{progressPercent}</span>
           </div>
           <div className={styles.bar}>
-            <div className={styles.barFill} />
+            <div
+              className={styles.barFill}
+              style={{ width: done ? "10%" : "0%" }}
+            />
           </div>
         </div>
 
         <p className={styles.group}>{c.groupFirstDay}</p>
 
-        <div className={`${styles.card} ${styles.task}`}>
-          <span className={styles.check} />
+        <div
+          className={`${styles.card} ${styles.task} ${done ? styles.taskDone : ""}`}
+        >
+          <span className={`${styles.check} ${done ? styles.checkDone : ""}`}>
+            {done ? <IconCheck size={14} /> : null}
+          </span>
           <div className={styles.taskBody}>
-            <p className={styles.taskTitle}>{c.taskBank}</p>
+            <p className={`${styles.taskTitle} ${done ? styles.titleDone : ""}`}>
+              {c.taskBank}
+            </p>
             {showJa ? <p className={styles.taskJa}>{c.taskBankJa}</p> : null}
             <p className={styles.taskDate}>{c.taskBankDate}</p>
             <div className={styles.metaRow}>
-              <span className={`${styles.chip} ${styles.chipProgress}`}>
-                {c.taskBankStatus}
+              <span
+                className={`${styles.chip} ${done ? styles.chipDone : styles.chipProgress}`}
+              >
+                {done ? c.taskBankStatusDone : c.taskBankStatus}
               </span>
             </div>
           </div>

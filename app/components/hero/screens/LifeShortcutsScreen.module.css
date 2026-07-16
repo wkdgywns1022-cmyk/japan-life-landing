@@ -1,0 +1,124 @@
+/* Fixed logical canvas matching Home / DeviceShell display (fills phone viewport).
+   Content is absolutely positioned — never flex-stretched to fill height. */
+
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+/* Status bar: fixed 58px (same as Home StatusBar) */
+.status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 58px;
+  z-index: 2;
+}
+
+/* Bottom nav pinned to canvas bottom — natural height, not pushed by content */
+.nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* Content sits between status and nav; does not grow or space-between */
+.content {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  right: 0;
+  bottom: 74px;
+  padding: 10px 20px 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.header {
+  margin: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #667085;
+  line-height: 1.4;
+}
+
+/* Flutter LifeShortcutCard: 124×120, gap 12, radius 20 */
+.grid {
+  display: grid;
+  grid-template-columns: 124px 124px;
+  grid-auto-rows: 120px;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: start;
+  align-content: start;
+}
+
+.card {
+  width: 124px;
+  height: 120px;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid rgba(228, 231, 236, 0.6);
+  box-shadow:
+    0 2px 12px rgba(10, 22, 40, 0.02),
+    0 1px 2px rgba(10, 22, 40, 0.012);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  flex-shrink: 0;
+}
+
+.cardText {
+  margin-top: auto;
+  min-width: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+  color: #111827;
+}
+
+.cardSub {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #667085;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

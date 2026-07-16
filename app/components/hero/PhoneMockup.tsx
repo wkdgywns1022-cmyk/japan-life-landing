@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type { PhoneScreenId } from "./i18n";
+import type { PhoneScreenId } from "../hero/i18n";
+import DeviceShell from "../phone/DeviceShell";
 import HomeScreen from "./screens/HomeScreen";
 import ChecklistScreen from "./screens/ChecklistScreen";
 import ExpenseScreen from "./screens/ExpenseScreen";
@@ -94,40 +95,27 @@ export default function PhoneMockup() {
     screen === "home" || screen === "checklist" || screen === "expense";
 
   return (
-    <div
-      className={styles.stage}
-      aria-hidden="true"
+    <DeviceShell
+      size="hero"
+      floating
+      showHomeIndicator={showHomeIndicator}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className={styles.glow} />
-      <div className={styles.device}>
-        <span className={styles.silent} />
-        <span className={styles.volUp} />
-        <span className={styles.volDown} />
-        <span className={styles.power} />
-
-        <div className={styles.display}>
-          <div className={styles.island} />
-
-          <div className={styles.canvas}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={screen}
-                className={styles.screenLayer}
-                initial={reduceMotion ? false : { opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
-                transition={{ duration: TRANSITION_S, ease: "easeInOut" }}
-              >
-                {content}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {showHomeIndicator ? <div className={styles.homeIndicator} /> : null}
-        </div>
+      <div className={styles.layerHost}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={screen}
+            className={styles.screenLayer}
+            initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+            transition={{ duration: TRANSITION_S, ease: "easeInOut" }}
+          >
+            {content}
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </div>
+    </DeviceShell>
   );
 }

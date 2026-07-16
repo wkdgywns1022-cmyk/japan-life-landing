@@ -31,7 +31,8 @@ export default function BottomNav({
       {items.map(({ id, label, Icon }) => {
         const isActive =
           id === active ||
-          (active === "wardOfficeJapanese" && id === "home");
+          (active === "wardOfficeJapanese" && id === "home") ||
+          (active === "lifeShortcuts" && id === "home");
         return (
           <div
             key={id}

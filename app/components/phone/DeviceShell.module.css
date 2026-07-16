@@ -1,0 +1,250 @@
+.stage {
+  --phone-w: 393px;
+  --phone-h: 852px;
+  --bezel: 11px;
+  --outer-radius: 56px;
+  --inner-radius: 46px;
+  --island-w: 126px;
+  --island-h: 37px;
+  --phone-scale: 0.58;
+
+  position: relative;
+  width: calc(var(--phone-w) * var(--phone-scale));
+  height: calc(var(--phone-h) * var(--phone-scale));
+  margin-inline: auto;
+  will-change: transform;
+}
+
+.hero {
+  /* Match story phone so Hero → Story feels like one continuous device */
+  --phone-scale: min(0.915, calc((100dvh - 140px) / 852px));
+}
+
+.feature {
+  --phone-scale: 0.58;
+}
+
+/* ~360px wide, capped so the full device fits in the viewport */
+.story {
+  --phone-scale: min(0.915, calc((100dvh - 140px) / 852px));
+}
+
+.floating {
+  animation: phoneFloat 5.5s ease-in-out infinite;
+}
+
+@keyframes phoneFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.glow {
+  position: absolute;
+  width: 76%;
+  height: 46%;
+  bottom: -2%;
+  left: 50%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(130, 140, 160, 0.2), transparent 72%);
+  filter: blur(34px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.device {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: var(--phone-w);
+  height: var(--phone-h);
+  padding: var(--bezel);
+  border-radius: var(--outer-radius);
+  box-sizing: border-box;
+  background:
+    linear-gradient(
+      155deg,
+      #4a4a4c 0%,
+      #2c2c2e 18%,
+      #1c1c1e 52%,
+      #2a2a2c 82%,
+      #3a3a3c 100%
+    );
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.22) inset,
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.35) inset,
+    0 40px 80px -20px rgba(120, 130, 150, 0.4),
+    0 20px 40px -16px rgba(140, 148, 164, 0.28),
+    0 8px 16px -8px rgba(150, 158, 170, 0.18);
+  transform: scale(var(--phone-scale));
+  transform-origin: top left;
+  will-change: transform;
+}
+
+.device::before {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  border-radius: calc(var(--outer-radius) - 1.5px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.device::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.silent,
+.volUp,
+.volDown,
+.power {
+  position: absolute;
+  z-index: 3;
+  background: linear-gradient(90deg, #525254, #2e2e30 45%, #1f1f21);
+}
+
+.silent {
+  left: -2.5px;
+  top: 14%;
+  width: 3px;
+  height: 28px;
+  border-radius: 1px 2px 2px 1px;
+}
+
+.volUp,
+.volDown {
+  left: -2.5px;
+  width: 3px;
+  border-radius: 1px 2px 2px 1px;
+}
+
+.volUp {
+  top: 20.5%;
+  height: 52px;
+}
+
+.volDown {
+  top: 29.2%;
+  height: 52px;
+}
+
+.power {
+  right: -2.5px;
+  top: 23%;
+  width: 3px;
+  height: 76px;
+  border-radius: 2px 1px 1px 2px;
+  background: linear-gradient(270deg, #525254, #2e2e30 45%, #1f1f21);
+}
+
+.display {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--inner-radius);
+  overflow: hidden;
+  background: #fafafa;
+  box-shadow:
+    0 0 0 1px #0a0a0a,
+    0 0 0 2px rgba(255, 255, 255, 0.04) inset;
+}
+
+.island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 5;
+  width: var(--island-w);
+  height: var(--island-h);
+  border-radius: 19px;
+  background: #000;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.06) inset;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    "Apple SD Gothic Neo",
+    "Hiragino Sans",
+    "Noto Sans JP",
+    "Noto Sans KR",
+    sans-serif;
+  color: #111827;
+  background: #fafafa;
+  -webkit-font-smoothing: antialiased;
+}
+
+.canvas > * {
+  height: 100%;
+}
+
+.homeIndicator {
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  z-index: 6;
+  width: 128px;
+  height: 5px;
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.22);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+@media (max-width: 960px) {
+  .hero {
+    --phone-scale: 0.68;
+  }
+
+  .feature {
+    --phone-scale: 0.54;
+  }
+
+  .story {
+    --phone-scale: min(0.82, calc((100dvh - 120px) / 852px));
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    --phone-scale: 0.62;
+  }
+
+  .feature {
+    --phone-scale: 0.5;
+  }
+
+  .story {
+    --phone-scale: min(0.78, calc((100dvh - 100px) / 852px), calc(100vw / 393px * 0.86));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating {
+    animation: none;
+  }
+}

@@ -3,12 +3,16 @@
 import {
   IconChecklist,
   IconChevron,
+  IconDelivery,
+  IconEmergency,
+  IconHospital,
   IconLocation,
   IconPayments,
   IconPerson,
   IconSettings,
   IconSunny,
   IconToday,
+  IconTranslate,
   IconTrash,
 } from "../icons";
 import { useLocale } from "../LocaleProvider";
@@ -132,6 +136,22 @@ export default function HomeScreen() {
         </div>
 
         <p className={styles.sectionTitle}>{h.lifeShortcuts}</p>
+
+        <div className={styles.shortcuts}>
+          {[
+            { title: t.phone.shortcuts.items[0].title, bg: "#fef3f2", fg: "#f04438", Icon: IconHospital },
+            { title: t.phone.shortcuts.items[1].title, bg: "#fef3f2", fg: "#f04438", Icon: IconEmergency },
+            { title: t.phone.shortcuts.items[2].title, bg: "#fff6ed", fg: "#f79009", Icon: IconDelivery },
+            { title: t.phone.shortcuts.items[3].title, bg: "#eff4ff", fg: "#2563eb", Icon: IconTranslate },
+          ].map(({ title, bg, fg, Icon }) => (
+            <div key={title} className={styles.shortcut}>
+              <span className={styles.shortcutIcon} style={{ background: bg, color: fg }}>
+                <Icon size={16} />
+              </span>
+              <p className={styles.shortcutTitle}>{title}</p>
+            </div>
+          ))}
+        </div>
       </div>
       <BottomNav active="home" />
     </div>

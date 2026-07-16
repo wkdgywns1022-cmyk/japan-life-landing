@@ -188,3 +188,31 @@ export function IconArrowRight(props: IconProps) {
     </Icon>
   );
 }
+
+export function IconTranslate(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 5h7M7.5 5v2a7 7 0 0 0 7 7M9 19l4-10 4 10M10.5 15h5" />
+      <path d="M14 7h6M17 7c0 4-2 7-5 9" />
+    </Icon>
+  );
+}
+
+export function IconServices(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="4" y="4" width="7" height="7" rx="1.5" />
+      <rect x="13" y="4" width="7" height="7" rx="1.5" />
+      <rect x="4" y="13" width="7" height="7" rx="1.5" />
+      <rect x="13" y="13" width="7" height="7" rx="1.5" />
+    </Icon>
+  );
+}
+
+export function IconCheck(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 12.5l4.2 4.2L19 7" />
+    </Icon>
+  );
+}

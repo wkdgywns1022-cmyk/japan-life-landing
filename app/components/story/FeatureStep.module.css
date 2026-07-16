@@ -1,0 +1,95 @@
+.step {
+  min-height: 82vh;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding-block: 1.5rem;
+}
+
+.inner {
+  max-width: 34rem;
+  width: 100%;
+}
+
+.marker {
+  margin: 0 0 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--lp-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.heading {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.4vw, 2.65rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.22;
+  color: var(--lp-text-primary);
+}
+
+.line {
+  display: block;
+}
+
+.body {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.paragraph {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.45vw, 1.175rem);
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: -0.015em;
+  color: var(--lp-text-secondary);
+}
+
+.inactive {
+  pointer-events: none;
+}
+
+.mobilePhone {
+  display: none;
+}
+
+.step:first-child {
+  min-height: 78vh;
+  padding-top: 0.5rem;
+}
+
+.step:last-child {
+  min-height: 78vh;
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 899px) {
+  .step {
+    min-height: auto;
+    padding-block: 2.75rem;
+    align-items: flex-start;
+  }
+
+  .step:first-child,
+  .step:last-child {
+    min-height: auto;
+  }
+
+  .inner {
+    max-width: none;
+  }
+
+  .inactive {
+    pointer-events: auto;
+  }
+
+  .mobilePhone {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+}
