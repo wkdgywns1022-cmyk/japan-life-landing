@@ -247,7 +247,7 @@ export default function MobileProductShowcase({ features }: Props) {
               }
             >
               <p className={styles.marker}>{marker}</p>
-              <h2 className={styles.heading}>
+              <h2 className={styles.heading} data-locale={locale}>
                 {lines.map((line) => (
                   <span key={line} className={styles.line}>
                     {line}
@@ -265,9 +265,9 @@ export default function MobileProductShowcase({ features }: Props) {
           </AnimatePresence>
         </div>
 
-        <div className={styles.phoneArea}>
+        <div className={styles.phoneStage}>
           <div
-            className={styles.phoneFrame}
+            className={styles.phoneMockup}
             style={dragX ? { transform: `translateX(${dragX}px)` } : undefined}
           >
             <StoryPhone

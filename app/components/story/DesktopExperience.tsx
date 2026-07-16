@@ -11,6 +11,7 @@ import {
 import { useReducedMotion } from "motion/react";
 import type { PhoneScreenId } from "../hero/i18n";
 import { useLocale } from "../hero/LocaleProvider";
+import LanguageSelector from "../hero/LanguageSelector";
 import FeatureStep from "./FeatureStep";
 import ProgressDots from "./ProgressDots";
 import StoryPhone from "./StoryPhone";
@@ -41,8 +42,8 @@ type Props = {
 };
 
 /**
- * Desktop (≥900): one continuous sticky phone beside Hero + Product Story text.
- * Exactly one physical phone shell — only the internal screen changes.
+ * Desktop (≥900): Hero is the first text step of one continuous product story.
+ * One sticky language selector + one physical phone for the entire experience.
  */
 export default function DesktopExperience({
   features = PRODUCT_FEATURES,
@@ -59,7 +60,7 @@ export default function DesktopExperience({
   const nodesRef = useRef(new Map<StageId, HTMLElement>());
   const rotateTimerRef = useRef<number | null>(null);
   const pausedRef = useRef(false);
-  const heroBlockRef = useRef<HTMLDivElement | null>(null);
+  const heroStepRef = useRef<HTMLElement | null>(null);
 
   const clearRotate = useCallback(() => {
     if (rotateTimerRef.current !== null) {
@@ -75,9 +76,7 @@ export default function DesktopExperience({
       setActiveStage(next);
 
       const index =
-        next === HERO_ID
-          ? -1
-          : features.findIndex((f) => f.id === next);
+        next === HERO_ID ? -1 : features.findIndex((f) => f.id === next);
       onActiveFeatureIndexChange?.(index);
     },
     [features, onActiveFeatureIndexChange],
@@ -91,9 +90,8 @@ export default function DesktopExperience({
     [],
   );
 
-  // Observe Hero + feature steps — single active stage controller
   useEffect(() => {
-    const heroEl = heroBlockRef.current;
+    const heroEl = heroStepRef.current;
     if (heroEl) nodesRef.current.set(HERO_ID, heroEl);
     else nodesRef.current.delete(HERO_ID);
 
@@ -143,7 +141,6 @@ export default function DesktopExperience({
     };
   }, [features, locale, setStageStable]);
 
-  // Hero micro-demo rotation — only while Hero is active
   useEffect(() => {
     clearRotate();
     if (activeStage !== HERO_ID || reduceMotion) return;
@@ -166,7 +163,6 @@ export default function DesktopExperience({
     };
   }, [activeStage, reduceMotion, clearRotate]);
 
-  // Product Story: sync internal screen from active feature
   useEffect(() => {
     if (activeStage === HERO_ID) return;
     clearRotate();
@@ -236,19 +232,20 @@ export default function DesktopExperience({
     >
       <div className={styles.grid}>
         <div className={styles.textFlow}>
-          <div
+          <section
             id={HERO_ID}
             ref={(node) => {
-              heroBlockRef.current = node;
+              heroStepRef.current = node;
               setNodeRef(HERO_ID)(node);
             }}
-            className={styles.heroBlock}
+            className={styles.heroStep}
             aria-label="Hero"
+            data-active={activeStage === HERO_ID ? "true" : "false"}
           >
             {heroContent}
-          </div>
+          </section>
 
-          <div className={styles.storySteps}>
+          <div className={styles.featureSteps}>
             {features.map((feature, index) => {
               const copy = t.sections[feature.sectionKey];
               return (
@@ -267,34 +264,40 @@ export default function DesktopExperience({
           </div>
         </div>
 
-        <div className={styles.phoneRail} aria-hidden={false}>
-          <div
-            className={styles.stickyPhone}
-            onMouseEnter={handlePhoneEnter}
-            onMouseLeave={handlePhoneLeave}
-          >
-            <div className={styles.phoneCluster}>
-              <StoryPhone
-                screen={displayScreen}
-                demoActive={demoActive}
-                floating={activeStage === HERO_ID}
-                pauseOnHover
-                size="hero"
-              />
+        <aside className={styles.visualRail}>
+          <div className={styles.languageAndPhone}>
+            <div className={styles.phoneStage}>
+              <div className={styles.languageSlot}>
+                <LanguageSelector />
+              </div>
+
               <div
-                className={styles.clusterDots}
-                data-visible={inStory ? "true" : "false"}
+                className={styles.stickyPhone}
+                onMouseEnter={handlePhoneEnter}
+                onMouseLeave={handlePhoneLeave}
               >
-                <ProgressDots
-                  items={progressItems}
-                  activeId={progressActiveId}
-                  onSelect={scrollToFeature}
-                  orientation="vertical"
+                <StoryPhone
+                  screen={displayScreen}
+                  demoActive={demoActive}
+                  floating={false}
+                  pauseOnHover
+                  size="hero"
                 />
+                <div
+                  className={styles.progressIndicator}
+                  data-visible={inStory ? "true" : "false"}
+                >
+                  <ProgressDots
+                    items={progressItems}
+                    activeId={progressActiveId}
+                    onSelect={scrollToFeature}
+                    orientation="vertical"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </section>
   );

@@ -238,9 +238,9 @@
 
 .mobileHeroPhoneArea {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  max-width: 100%;
+  display: grid;
+  place-items: center;
   margin-top: 36px;
   margin-inline: 0;
   padding-inline: 0;
@@ -249,25 +249,25 @@
 }
 
 .mobileHeroPhone {
-  margin: 0 auto;
+  margin: 0;
   position: relative;
   left: auto;
   right: auto;
   transform: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  align-self: center;
   overflow: visible;
   padding: 0;
 }
 
 .mobileHeroPhone > * {
-  margin-left: 0;
-  margin-right: 0;
+  margin: 0;
   transform: none;
   left: auto;
   right: auto;
+  justify-self: center;
 }
 
 .blend {
@@ -392,15 +392,9 @@
     pointer-events: none;
   }
 
+  /* Desktop language selector is inside DesktopExperience sticky rail */
   .header {
-    position: absolute;
-    top: 1.5rem;
-    right: max(2rem, calc((100% - 1180px) / 2 + 2rem));
-    left: auto;
-    display: block;
-    justify-content: initial;
-    padding: 0;
-    z-index: 12;
+    display: none;
   }
 
   /* Mobile hero chrome unused on desktop */

@@ -53,24 +53,14 @@
 
 .showcase {
   --phone-scale: min(
-    calc(68vw / 393px),
-    calc(58svh / 852px),
-    calc(285px / 393px)
+    calc(76vw / 393px),
+    calc(60svh / 852px),
+    calc(310px / 393px)
   );
   width: calc(var(--phone-w) * var(--phone-scale));
   height: calc(var(--phone-h) * var(--phone-scale));
-}
-
-@container showcase-phone (min-height: 80px) {
-  .showcase {
-    --phone-scale: min(
-      calc(100cqw / 393px),
-      calc(100cqh / 852px),
-      calc(285px / 393px)
-    );
-    width: calc(var(--phone-w) * var(--phone-scale));
-    height: calc(var(--phone-h) * var(--phone-scale));
-  }
+  aspect-ratio: 393 / 852;
+  margin-inline: 0;
 }
 
 .floating {
@@ -243,12 +233,12 @@
   pointer-events: none;
 }
 
-/* Desktop-only large phones — match shared --desktop-story-phone-width */
+/* Desktop-only large phones — match shared --desktop-phone-width */
 @media (min-width: 900px) {
   .hero,
   .story {
     --phone-scale: min(
-      calc(var(--desktop-story-phone-width) / 393px),
+      calc(var(--desktop-phone-width, var(--desktop-story-phone-width)) / 393px),
       calc((100svh - 140px) / 852px)
     );
   }
@@ -268,15 +258,17 @@
 
 @media (max-width: 899px) {
   .stage {
-    width: min(calc(var(--phone-w) * var(--phone-scale)), 100%);
-    height: auto;
+    width: calc(var(--phone-w) * var(--phone-scale));
+    height: calc(var(--phone-h) * var(--phone-scale));
     max-width: 100%;
+    margin-inline: 0;
   }
 
   .stage.showcase {
     width: calc(var(--phone-w) * var(--phone-scale));
     height: calc(var(--phone-h) * var(--phone-scale));
     max-width: 100%;
+    margin-inline: 0;
   }
 
   .floating {
@@ -295,9 +287,9 @@
 
   .showcase {
     --phone-scale: min(
-      calc(68vw / 393px),
-      calc(58svh / 852px),
-      calc(285px / 393px)
+      calc(76vw / 393px),
+      calc(60svh / 852px),
+      calc(310px / 393px)
     );
   }
 }
@@ -308,7 +300,11 @@
   }
 
   .showcase {
-    --phone-scale: min(calc(72vw / 393px), calc(260px / 393px));
+    --phone-scale: min(
+      calc(76vw / 393px),
+      calc(60svh / 852px),
+      calc(300px / 393px)
+    );
   }
 }
 
@@ -318,7 +314,11 @@
   }
 
   .showcase {
-    --phone-scale: min(calc(60vw / 393px), calc(220px / 393px));
+    --phone-scale: min(
+      calc(70vw / 393px),
+      calc(52svh / 852px),
+      calc(260px / 393px)
+    );
   }
 }
 

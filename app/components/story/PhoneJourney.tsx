@@ -225,14 +225,17 @@ export default function PhoneJourney() {
       <div className={styles.storyBg} aria-hidden="true" />
       <div className={styles.heroWash} aria-hidden="true" />
 
-      <motion.header
-        className={styles.header}
-        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: appleEase, delay: 0.02 }}
-      >
-        <LanguageSelector />
-      </motion.header>
+      {/* Language selector: page header on mobile/pending; desktop uses sticky phone rail */}
+      {!isDesktop ? (
+        <motion.header
+          className={styles.header}
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: appleEase, delay: 0.02 }}
+        >
+          <LanguageSelector />
+        </motion.header>
+      ) : null}
 
       {/* Desktop: one continuous sticky phone beside Hero + Product Story */}
       {isDesktop ? (

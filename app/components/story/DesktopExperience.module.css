@@ -1,14 +1,24 @@
-/* Desktop continuous experience — one sticky phone beside Hero + Story */
+/* Desktop: Hero as first step of one continuous sticky visual rail */
 
 .experience {
+  --desktop-phone-width: var(
+    --desktop-story-phone-width,
+    clamp(330px, 27vw, 390px)
+  );
+
   position: relative;
   z-index: 1;
-  width: var(--desktop-page-width, min(1180px, calc(100% - 4rem)));
+  width: 100%;
+  max-width: 1440px;
   margin-inline: auto;
-  max-width: 100%;
-  box-sizing: border-box;
+  padding-inline: clamp(40px, 6vw, 96px);
   padding-bottom: 2rem;
+  box-sizing: border-box;
   overflow: visible;
+  transform: none;
+  filter: none;
+  perspective: none;
+  contain: none;
 }
 
 .grid {
@@ -16,10 +26,12 @@
   grid-template-columns:
     minmax(0, 1.08fr)
     minmax(340px, 0.72fr);
+  gap: clamp(56px, 7vw, 112px);
   align-items: start;
-  gap: var(--desktop-hero-gap, clamp(56px, 7vw, 112px));
   width: 100%;
   overflow: visible;
+  transform: none;
+  filter: none;
 }
 
 .textFlow {
@@ -30,7 +42,7 @@
   overflow: visible;
 }
 
-.heroBlock {
+.heroStep {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -38,20 +50,24 @@
   padding-block: 5rem 3rem;
   box-sizing: border-box;
   overflow-x: clip;
+  transition: opacity 320ms ease;
 }
 
-.storySteps {
+.heroStep[data-active="false"] {
+  opacity: 0.42;
+}
+
+.featureSteps {
   min-width: 0;
   position: relative;
   overflow: visible;
 }
 
-.phoneRail {
+.visualRail {
   position: relative;
-  min-height: 100%;
   min-width: 0;
+  min-height: 100%;
   z-index: 2;
-  /* Must NOT create a sticky-blocking containing block */
   overflow: visible;
   transform: none;
   filter: none;
@@ -59,42 +75,61 @@
   contain: none;
 }
 
-.stickyPhone {
+/* Sticky group: language selector + phone (+ absolute dots) */
+.languageAndPhone {
   position: sticky;
-  top: clamp(72px, 9vh, 108px);
+  top: clamp(20px, 4vh, 44px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 0.5rem;
+  overflow: visible;
+  transform: none;
+  filter: none;
+  pointer-events: none;
+}
+
+/* Width matches phone only — dots sit outside and do not affect centering */
+.phoneStage {
+  position: relative;
+  width: var(--desktop-phone-width);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+
+.languageSlot {
+  align-self: center;
+  margin-bottom: 14px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 12;
+}
+
+.stickyPhone {
+  position: relative;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100svh - 140px);
+  max-height: calc(100svh - 120px);
   background: transparent;
   overflow: visible;
   pointer-events: none;
 }
 
-.phoneCluster {
-  position: relative;
-  display: block;
-  width: var(--desktop-story-phone-width, clamp(330px, 27vw, 390px));
-  max-height: calc(100svh - 140px);
-  margin-inline: auto;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  box-shadow: none;
-  padding: 0;
-  overflow: visible;
-  isolation: auto;
-  pointer-events: none;
-}
-
-.phoneCluster > *:first-child {
+.stickyPhone > *:first-child {
   max-width: 100%;
   display: flex;
   justify-content: center;
   pointer-events: none;
 }
 
-.clusterDots {
+.progressIndicator {
   position: absolute;
   left: calc(100% + 28px);
   top: 50%;
@@ -106,18 +141,35 @@
   transition: opacity 280ms ease;
 }
 
-.clusterDots[data-visible="true"] {
+.progressIndicator[data-visible="true"] {
   opacity: 1;
   pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clusterDots {
+  .heroStep {
+    transition: none;
+  }
+
+  .heroStep[data-active="false"] {
+    opacity: 1;
+  }
+
+  .progressIndicator {
     transition: none;
   }
 }
 
-/* Hidden below desktop — component should also be unmounted */
+@media (max-width: 1100px) {
+  .experience {
+    padding-inline: clamp(28px, 4vw, 56px);
+  }
+
+  .grid {
+    gap: clamp(36px, 5vw, 72px);
+  }
+}
+
 @media (max-width: 899px) {
   .experience {
     display: none;
