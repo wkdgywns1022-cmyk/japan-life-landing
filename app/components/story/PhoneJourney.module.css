@@ -200,9 +200,20 @@
 
 .storySteps {
   min-width: 0;
+  position: relative;
+  overflow: visible;
 }
 
-/* Shared in-flow phone — mobile / small tablet only */
+/* Mobile sticky phone — hidden on desktop */
+.mobileStickyVisual {
+  display: none;
+}
+
+.mobileStoryEnd {
+  display: none;
+}
+
+/* Shared in-flow phone legacy slot removed — sticky visual replaces it */
 .sharedStoryPhone {
   display: none;
 }
@@ -318,10 +329,11 @@
   }
 }
 
-/* —— Small tablet + mobile: sticky story off —— */
+/* —— Small tablet + mobile: compact sticky story —— */
 @media (max-width: 899px) {
   .journey {
     overflow-x: clip;
+    overflow-y: visible;
   }
 
   .header {
@@ -346,6 +358,15 @@
     gap: 0;
     padding-inline: 22px;
     box-sizing: border-box;
+    overflow: visible;
+    transform: none;
+    filter: none;
+  }
+
+  .copyColumn {
+    overflow: visible;
+    transform: none;
+    filter: none;
   }
 
   .stickyPhoneColumn {
@@ -458,24 +479,48 @@
     height: 32px;
   }
 
-  .sharedStoryPhone {
+  .storySteps {
+    width: 100%;
+    padding-bottom: 0;
+    overflow: visible;
+  }
+
+  .mobileStickyVisual {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
+    position: sticky;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    z-index: 4;
     width: 100%;
     max-width: 100%;
-    padding: 8px 0 28px;
+    margin: 0;
+    padding: 10px 0 14px;
     box-sizing: border-box;
-    overflow: visible;
     background: transparent;
     border: 0;
     box-shadow: none;
+    overflow: visible;
+    /* Soft page fade so scrolling text doesn't show through the phone */
+    background-image: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #ffffff 70%,
+      rgba(255, 255, 255, 0.7) 86%,
+      transparent 100%
+    );
   }
 
-  .storySteps {
+  .mobileStoryEnd {
+    display: block;
+    height: 28svh;
     width: 100%;
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+  }
+
+  .sharedStoryPhone {
+    display: none;
   }
 
   .finalCta {

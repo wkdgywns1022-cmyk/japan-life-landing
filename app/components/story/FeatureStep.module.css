@@ -63,24 +63,30 @@
   padding-bottom: 2rem;
 }
 
-/* Compact story stages — no giant empty vh regions */
+/* Compact: tall enough activation zones for sticky-phone observer */
 @media (max-width: 899px) {
   .step {
-    min-height: 0;
+    min-height: 64svh;
     height: auto;
-    padding-block: 64px;
-    align-items: stretch;
+    padding: 48px 8px;
+    align-items: center;
+    justify-content: center;
   }
 
   .step:first-child,
   .step:last-child {
-    min-height: 0;
-    padding-top: 56px;
-    padding-bottom: 56px;
+    min-height: 64svh;
+    padding-top: 48px;
+    padding-bottom: 48px;
   }
 
   .step:first-child {
-    padding-top: 40px;
+    padding-top: 28px;
+  }
+
+  .step:last-child {
+    min-height: 70svh;
+    padding-bottom: 56px;
   }
 
   .inner {
@@ -121,17 +127,17 @@
 
 @media (max-width: 767px) {
   .step {
-    padding-block: 60px;
+    min-height: 64svh;
+    padding: 48px 4px;
   }
 
   .step:first-child,
   .step:last-child {
-    padding-top: 48px;
-    padding-bottom: 48px;
+    min-height: 64svh;
   }
 
-  .step:first-child {
-    padding-top: 36px;
+  .step:last-child {
+    min-height: 72svh;
   }
 
   .heading {

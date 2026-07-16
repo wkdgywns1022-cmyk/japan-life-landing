@@ -245,21 +245,22 @@
     );
   }
 
+  /* Compact product-story phone — stays visible under sticky */
   .story {
-    --phone-h-cap: 66vh;
+    --phone-h-cap: 44vh;
     --phone-scale: min(
-      calc(70vw / 393px),
+      calc(58vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(300px / 393px)
+      calc(250px / 393px)
     );
   }
 
   .feature {
-    --phone-h-cap: 66vh;
+    --phone-h-cap: 44vh;
     --phone-scale: min(
-      calc(70vw / 393px),
+      calc(58vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(300px / 393px)
+      calc(250px / 393px)
     );
   }
 
@@ -276,7 +277,7 @@
 
     .story,
     .feature {
-      --phone-h-cap: 66svh;
+      --phone-h-cap: 44svh;
     }
   }
 }
@@ -292,20 +293,20 @@
   }
 
   .story {
-    --phone-h-cap: 66vh;
+    --phone-h-cap: 44vh;
     --phone-scale: min(
-      calc(76vw / 393px),
+      calc(58vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(320px / 393px)
+      calc(250px / 393px)
     );
   }
 
   .feature {
-    --phone-h-cap: 66vh;
+    --phone-h-cap: 44vh;
     --phone-scale: min(
-      calc(76vw / 393px),
+      calc(58vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(320px / 393px)
+      calc(250px / 393px)
     );
   }
 }
@@ -318,7 +319,7 @@
 
     .story,
     .feature {
-      --phone-h-cap: 66svh;
+      --phone-h-cap: 44svh;
     }
   }
 }
@@ -335,11 +336,11 @@
 
   .story,
   .feature {
-    --phone-h-cap: 60vh;
+    --phone-h-cap: 38vh;
     --phone-scale: min(
-      calc(82vw / 393px),
+      calc(54vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(276px / 393px)
+      calc(220px / 393px)
     );
   }
 }
@@ -352,7 +353,7 @@
 
     .story,
     .feature {
-      --phone-h-cap: 60svh;
+      --phone-h-cap: 38svh;
     }
   }
 }
@@ -369,11 +370,11 @@
 
   .story,
   .feature {
-    --phone-h-cap: 50vh;
+    --phone-h-cap: 34vh;
     --phone-scale: min(
-      calc(68vw / 393px),
+      calc(50vw / 393px),
       calc(var(--phone-h-cap) / 852px),
-      calc(240px / 393px)
+      calc(200px / 393px)
     );
   }
 }
@@ -386,7 +387,7 @@
 
     .story,
     .feature {
-      --phone-h-cap: 50svh;
+      --phone-h-cap: 34svh;
     }
   }
 }

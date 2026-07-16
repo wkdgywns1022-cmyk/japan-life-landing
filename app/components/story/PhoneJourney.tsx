@@ -170,7 +170,8 @@ export default function PhoneJourney() {
     if (nodes.length === 0) return;
 
     const pickClosest = () => {
-      const viewportCenter = window.innerHeight * (isCompact ? 0.38 : 0.42);
+      // Mobile: target ~60% down the viewport so text under sticky phone wins
+      const targetLine = window.innerHeight * (isCompact ? 0.6 : 0.42);
       let bestId: StageId = activeStageRef.current;
       let bestDist = Number.POSITIVE_INFINITY;
 
@@ -178,9 +179,10 @@ export default function PhoneJourney() {
         const node = nodesRef.current.get(id);
         if (!node) continue;
         const rect = node.getBoundingClientRect();
-        if (rect.bottom < 60 || rect.top > window.innerHeight - 60) continue;
-        const center = rect.top + rect.height * (isCompact ? 0.4 : 0.35);
-        const dist = Math.abs(center - viewportCenter);
+        // Skip fully off-screen steps
+        if (rect.bottom < 40 || rect.top > window.innerHeight - 40) continue;
+        const center = rect.top + rect.height * 0.5;
+        const dist = Math.abs(center - targetLine);
         if (dist < bestDist) {
           bestDist = dist;
           bestId = id;
@@ -192,16 +194,18 @@ export default function PhoneJourney() {
 
     const observer = new IntersectionObserver(() => pickClosest(), {
       root: null,
-      rootMargin: isCompact ? "-20% 0px -35% 0px" : "-35% 0px -45% 0px",
-      threshold: [0.15, 0.3, 0.5],
+      rootMargin: isCompact ? "-28% 0px -52% 0px" : "-35% 0px -45% 0px",
+      threshold: isCompact ? [0, 0.15, 0.3, 0.5] : [0.15, 0.3, 0.5],
     });
 
     nodes.forEach((node) => observer.observe(node));
     pickClosest();
     window.addEventListener("scroll", pickClosest, { passive: true });
+    window.addEventListener("resize", pickClosest, { passive: true });
     return () => {
       observer.disconnect();
       window.removeEventListener("scroll", pickClosest);
+      window.removeEventListener("resize", pickClosest);
     };
   }, [locale, setStageStable, isCompact]);
 
@@ -233,10 +237,10 @@ export default function PhoneJourney() {
     const target = screenForStage(activeStage);
     if (target === displayScreen) return;
 
-    const delay = reduceMotion ? 0 : PHONE_DELAY_MS;
+    const delay = reduceMotion ? 0 : isCompact ? 700 : PHONE_DELAY_MS;
     const id = window.setTimeout(() => setDisplayScreen(target), delay);
     return () => window.clearTimeout(id);
-  }, [activeStage, displayScreen, reduceMotion, clearRotate]);
+  }, [activeStage, displayScreen, reduceMotion, clearRotate, isCompact]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -333,7 +337,7 @@ export default function PhoneJourney() {
     if (!node) return;
     node.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
-      block: isCompact ? "start" : "center",
+      block: isCompact ? "center" : "center",
     });
     setStageStable(id as StageId);
   };
@@ -345,10 +349,6 @@ export default function PhoneJourney() {
 
   const progressActiveId =
     activeStage === HERO_ID ? FEATURES[0].id : activeStage;
-
-  const introFeature = FEATURES[0];
-  const remainingFeatures = FEATURES.slice(1);
-  const introCopy = t.sections[introFeature.sectionKey];
 
   const storyPhoneScreen =
     activeStage === HERO_ID ? FEATURES[0].screen : displayScreen;
@@ -425,7 +425,7 @@ export default function PhoneJourney() {
               >
                 <StoryPhone
                   screen={displayScreen}
-                  demoActive={demoActive}
+                  demoActive={false}
                   floating={activeStage === HERO_ID && !isCompact}
                   size="hero"
                 />
@@ -436,18 +436,8 @@ export default function PhoneJourney() {
           <div className={styles.blend} aria-hidden="true" />
 
           <div className={styles.storySteps}>
-            <FeatureStep
-              id={introFeature.id}
-              index={0}
-              screen={introFeature.screen}
-              heading={introCopy.heading}
-              body={introCopy.body}
-              active={activeStage === introFeature.id}
-              stepRef={setNodeRef(introFeature.id)}
-            />
-
-            {/* In-flow shared phone — visible below 900px only */}
-            <div className={styles.sharedStoryPhone}>
+            {/* Mobile/tablet: sticky shared phone through all six features */}
+            <div className={styles.mobileStickyVisual}>
               <StoryPhone
                 screen={storyPhoneScreen}
                 demoActive={demoActive}
@@ -461,13 +451,13 @@ export default function PhoneJourney() {
               />
             </div>
 
-            {remainingFeatures.map((feature, index) => {
+            {FEATURES.map((feature, index) => {
               const copy = t.sections[feature.sectionKey];
               return (
                 <FeatureStep
                   key={feature.id}
                   id={feature.id}
-                  index={index + 1}
+                  index={index}
                   screen={feature.screen}
                   heading={copy.heading}
                   body={copy.body}
@@ -476,6 +466,8 @@ export default function PhoneJourney() {
                 />
               );
             })}
+
+            <div className={styles.mobileStoryEnd} aria-hidden="true" />
           </div>
         </div>
 
