@@ -20,6 +20,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -32,4 +33,5 @@ body {
   background: var(--lp-hero-bg);
   color: var(--lp-text-primary);
   font-family: var(--font-geist-sans), "Noto Sans KR", sans-serif;
+  overflow-x: clip;
 }

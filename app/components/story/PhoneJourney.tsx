@@ -232,11 +232,25 @@ export default function PhoneJourney() {
     return () => window.clearTimeout(id);
   }, [activeStage, displayScreen, reduceMotion, clearRotate]);
 
-  // Subtle hero parallax via CSS custom properties (no React state per frame)
+  // Subtle hero parallax via CSS custom properties (desktop only)
   useEffect(() => {
     if (reduceMotion) {
       journeyRef.current?.style.setProperty("--hero-parallax", "0");
       return;
+    }
+
+    const mq = window.matchMedia("(max-width: 767px)");
+    const disableParallax = () => {
+      journeyRef.current?.style.setProperty("--hero-parallax", "0");
+    };
+
+    if (mq.matches) {
+      disableParallax();
+      const onChange = () => {
+        if (mq.matches) disableParallax();
+      };
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
     }
 
     let raf = 0;
@@ -246,7 +260,6 @@ export default function PhoneJourney() {
       const rect = heroNode.getBoundingClientRect();
       const range = Math.max(rect.height * 0.55, 1);
       const raw = Math.min(1, Math.max(0, -rect.top / range));
-      // Stop updating once handoff is complete (hero mostly gone)
       const value = activeStageRef.current === HERO_ID ? raw : Math.min(raw, 1);
       journeyRef.current.style.setProperty("--hero-parallax", String(value));
     };
@@ -258,8 +271,10 @@ export default function PhoneJourney() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
+    mq.addEventListener("change", disableParallax);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      mq.removeEventListener("change", disableParallax);
       cancelAnimationFrame(raf);
     };
   }, [reduceMotion, locale]);

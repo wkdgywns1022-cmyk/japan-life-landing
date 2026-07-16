@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { PhoneScreenId } from "../hero/i18n";
 import styles from "./FeatureStep.module.css";
@@ -29,46 +29,72 @@ export default function FeatureStep({
   mobilePhone,
 }: Props) {
   const reduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
   const lines = heading.split("\n");
   const bodyBlocks = body.split("\n\n");
   const marker = String(index + 1).padStart(2, "0");
+
+  useEffect(() => {
+    // Sticky phone is off below 900px — treat as stacked, fully readable sections
+    const mq = window.matchMedia("(max-width: 899px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Mobile: each step is self-contained — keep copy fully readable (no sticky dimming)
+  const fullyVisible = isMobile || reduceMotion;
 
   return (
     <article
       id={id}
       ref={stepRef}
       data-screen={screen}
-      className={`${styles.step} ${active ? styles.active : styles.inactive}`}
+      className={`${styles.step} ${active || isMobile ? styles.active : styles.inactive}`}
       aria-current={active ? "true" : undefined}
     >
       <div className={styles.inner}>
         <motion.p
           className={styles.marker}
+          initial={
+            fullyVisible
+              ? { opacity: 0 }
+              : false
+          }
+          whileInView={fullyVisible ? { opacity: 1 } : undefined}
+          viewport={fullyVisible ? { once: true, amount: 0.35 } : undefined}
           animate={
-            reduceMotion
-              ? { opacity: active ? 1 : 0.34 }
+            fullyVisible
+              ? undefined
               : {
                   opacity: active ? 1 : 0.32,
                   scale: active ? 1 : 0.94,
                 }
           }
-          transition={{ duration: 0.45, ease: appleEase }}
+          transition={{ duration: fullyVisible ? 0.4 : 0.45, ease: appleEase }}
         >
           {marker}
         </motion.p>
 
         <motion.h2
           className={styles.heading}
+          initial={fullyVisible ? { opacity: 0 } : false}
+          whileInView={fullyVisible ? { opacity: 1 } : undefined}
+          viewport={fullyVisible ? { once: true, amount: 0.35 } : undefined}
           animate={
-            reduceMotion
-              ? { opacity: active ? 1 : 0.34 }
+            fullyVisible
+              ? undefined
               : {
                   opacity: active ? 1 : 0.34,
                   y: active ? 0 : 22,
-                  filter: active ? "blur(0px)" : "blur(0px)",
                 }
           }
-          transition={{ duration: 0.65, ease: appleEase }}
+          transition={{
+            duration: fullyVisible ? 0.45 : 0.65,
+            ease: appleEase,
+            delay: fullyVisible ? 0.04 : 0,
+          }}
         >
           {lines.map((line) => (
             <span key={line} className={styles.line}>
@@ -79,18 +105,21 @@ export default function FeatureStep({
 
         <motion.div
           className={styles.body}
+          initial={fullyVisible ? { opacity: 0 } : false}
+          whileInView={fullyVisible ? { opacity: 1 } : undefined}
+          viewport={fullyVisible ? { once: true, amount: 0.3 } : undefined}
           animate={
-            reduceMotion
-              ? { opacity: active ? 1 : 0.34 }
+            fullyVisible
+              ? undefined
               : {
                   opacity: active ? 1 : 0.34,
                   y: active ? 0 : 16,
                 }
           }
           transition={{
-            duration: 0.6,
+            duration: fullyVisible ? 0.45 : 0.6,
             ease: appleEase,
-            delay: active && !reduceMotion ? 0.14 : 0,
+            delay: fullyVisible ? 0.1 : active ? 0.14 : 0,
           }}
         >
           {bodyBlocks.map((block) => (
@@ -105,7 +134,15 @@ export default function FeatureStep({
         </motion.div>
 
         {mobilePhone ? (
-          <div className={styles.mobilePhone}>{mobilePhone}</div>
+          <motion.div
+            className={styles.mobilePhone}
+            initial={isMobile ? { opacity: 0 } : false}
+            whileInView={isMobile ? { opacity: 1 } : undefined}
+            viewport={isMobile ? { once: true, amount: 0.25 } : undefined}
+            transition={{ duration: 0.5, ease: appleEase, delay: 0.12 }}
+          >
+            {mobilePhone}
+          </motion.div>
         ) : null}
       </div>
     </article>

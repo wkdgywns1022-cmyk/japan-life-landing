@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { PhoneScreenId } from "../hero/i18n";
 import DeviceShell from "../phone/DeviceShell";
@@ -48,14 +49,24 @@ export default function StoryPhone({
   floating = false,
 }: Props) {
   const reduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
   const showHomeIndicator = screen !== "wardOfficeJapanese";
+  const simpleFade = Boolean(reduceMotion || isMobile);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   return (
     <div className={styles.wrap}>
       <div className={styles.glow} aria-hidden="true" />
       <DeviceShell
         size="story"
-        floating={floating && !reduceMotion}
+        floating={floating && !reduceMotion && !isMobile}
         showHomeIndicator={showHomeIndicator}
       >
         <div className={styles.layerHost}>
@@ -64,7 +75,7 @@ export default function StoryPhone({
               key={screen}
               className={styles.screenLayer}
               initial={
-                reduceMotion
+                simpleFade
                   ? { opacity: 0 }
                   : {
                       opacity: 0,
@@ -74,7 +85,7 @@ export default function StoryPhone({
                     }
               }
               animate={
-                reduceMotion
+                simpleFade
                   ? { opacity: 1 }
                   : {
                       opacity: 1,
@@ -83,19 +94,10 @@ export default function StoryPhone({
                       filter: "blur(0px)",
                     }
               }
-              exit={
-                reduceMotion
-                  ? { opacity: 0 }
-                  : {
-                      opacity: 0,
-                      y: -5,
-                      scale: 0.992,
-                      filter: "blur(2px)",
-                    }
-              }
+              exit={simpleFade ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.992, filter: "blur(2px)" }}
               transition={
-                reduceMotion
-                  ? { duration: 0.2, ease: "easeOut" }
+                simpleFade
+                  ? { duration: 0.35, ease: "easeOut" }
                   : {
                       opacity: { duration: 0.55, ease: appleEase },
                       y: { duration: 0.58, ease: appleEase },

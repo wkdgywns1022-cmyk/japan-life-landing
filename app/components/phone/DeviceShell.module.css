@@ -229,17 +229,34 @@
   }
 }
 
-@media (max-width: 480px) {
-  .hero {
-    --phone-scale: 0.62;
+@media (max-width: 767px) {
+  .hero,
+  .story {
+    /* ~75vw wide, also capped so Hero stays within one viewport */
+    --phone-scale: min(
+      calc(75vw / 393px),
+      calc((100svh - 270px) / 852px),
+      0.78
+    );
   }
 
   .feature {
-    --phone-scale: 0.5;
+    --phone-scale: min(calc(75vw / 393px), 0.72);
+  }
+}
+
+@media (max-width: 480px) {
+  .feature {
+    --phone-scale: min(calc(74vw / 393px), 0.7);
   }
 
+  .hero,
   .story {
-    --phone-scale: min(0.78, calc((100dvh - 100px) / 852px), calc(100vw / 393px * 0.86));
+    --phone-scale: min(
+      calc(74vw / 393px),
+      calc((100svh - 300px) / 852px),
+      0.76
+    );
   }
 }
 

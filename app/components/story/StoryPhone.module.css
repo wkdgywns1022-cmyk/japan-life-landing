@@ -3,6 +3,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .glow {
@@ -36,4 +38,16 @@
   display: flex;
   flex-direction: column;
   will-change: transform, opacity, filter;
+}
+
+@media (max-width: 767px) {
+  .glow {
+    width: 90%;
+    height: 55%;
+    opacity: 0.7;
+  }
+
+  .screenLayer {
+    will-change: opacity;
+  }
 }
