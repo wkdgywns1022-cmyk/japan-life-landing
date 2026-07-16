@@ -11,7 +11,12 @@
   --phone-screen-bottom: var(--bezel);
   --phone-screen-left: var(--bezel);
   --phone-screen-radius: var(--inner-radius);
-  --phone-scale: 0.58;
+  /* Mobile-safe default — desktop overrides only at ≥900px */
+  --phone-scale: min(
+    calc(78vw / 393px),
+    calc(58svh / 852px),
+    calc(310px / 393px)
+  );
 
   position: relative;
   display: block;
@@ -27,26 +32,30 @@
   overflow: visible;
   isolation: auto;
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .hero {
-  --phone-scale: min(0.915, calc((100svh - 140px) / 852px), calc(390px / 393px));
+  --phone-scale: min(
+    calc(78vw / 393px),
+    calc(58svh / 852px),
+    calc(310px / 393px)
+  );
 }
 
 .feature {
-  --phone-scale: 0.58;
+  --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
 }
 
 .story {
-  --phone-scale: min(0.68, calc((100svh - 160px) / 852px));
+  --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
 }
 
-/* Mobile showcase: prefer container size; fall back to svh/vw (never 0) */
 .showcase {
   --phone-scale: min(
-    calc(72vw / 393px),
-    calc(52svh / 852px),
-    calc(300px / 393px)
+    calc(68vw / 393px),
+    calc(58svh / 852px),
+    calc(285px / 393px)
   );
   width: calc(var(--phone-w) * var(--phone-scale));
   height: calc(var(--phone-h) * var(--phone-scale));
@@ -57,7 +66,7 @@
     --phone-scale: min(
       calc(100cqw / 393px),
       calc(100cqh / 852px),
-      calc(300px / 393px)
+      calc(285px / 393px)
     );
     width: calc(var(--phone-w) * var(--phone-scale));
     height: calc(var(--phone-h) * var(--phone-scale));
@@ -234,34 +243,31 @@
   pointer-events: none;
 }
 
-@media (max-width: 899px) {
-  .hero {
-    --phone-scale: min(calc(72vw / 393px), calc(320px / 393px));
-  }
-
-  /*
-    Sticky story phone: width-only scale.
-    Avoid svh/dvh so browser chrome expand/collapse cannot resize the shell mid-scroll.
-  */
+/* Desktop-only large phones */
+@media (min-width: 900px) {
+  .hero,
   .story {
-    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
+    --phone-scale: min(
+      0.915,
+      calc((100svh - 140px) / 852px),
+      calc(390px / 393px)
+    );
   }
 
   .feature {
-    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
+    --phone-scale: 0.58;
   }
 
-  .showcase {
-    --phone-scale: min(
-      calc(72vw / 393px),
-      calc(52svh / 852px),
-      calc(300px / 393px)
-    );
-    width: calc(var(--phone-w) * var(--phone-scale));
-    height: calc(var(--phone-h) * var(--phone-scale));
+  .stage {
     max-width: none;
   }
 
+  .floating {
+    animation: phoneFloat 5.5s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 899px) {
   .stage {
     width: min(calc(var(--phone-w) * var(--phone-scale)), 100%);
     height: auto;
@@ -271,7 +277,7 @@
   .stage.showcase {
     width: calc(var(--phone-w) * var(--phone-scale));
     height: calc(var(--phone-h) * var(--phone-scale));
-    max-width: none;
+    max-width: 100%;
   }
 
   .floating {
@@ -281,15 +287,19 @@
 
 @media (max-width: 767px) {
   .hero {
-    --phone-scale: min(calc(78vw / 393px), calc(330px / 393px));
+    --phone-scale: min(
+      calc(78vw / 393px),
+      calc(58svh / 852px),
+      calc(310px / 393px)
+    );
   }
 
-  .story {
-    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
-  }
-
-  .feature {
-    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
+  .showcase {
+    --phone-scale: min(
+      calc(68vw / 393px),
+      calc(58svh / 852px),
+      calc(285px / 393px)
+    );
   }
 }
 
@@ -298,9 +308,8 @@
     --phone-scale: min(calc(84vw / 393px), calc(286px / 393px));
   }
 
-  .story,
-  .feature {
-    --phone-scale: min(calc(54vw / 393px), calc(220px / 393px));
+  .showcase {
+    --phone-scale: min(calc(72vw / 393px), calc(260px / 393px));
   }
 }
 
@@ -309,9 +318,8 @@
     --phone-scale: min(calc(70vw / 393px), calc(260px / 393px));
   }
 
-  .story,
-  .feature {
-    --phone-scale: min(calc(50vw / 393px), calc(200px / 393px));
+  .showcase {
+    --phone-scale: min(calc(60vw / 393px), calc(220px / 393px));
   }
 }
 

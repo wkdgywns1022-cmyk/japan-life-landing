@@ -1,4 +1,4 @@
-/* Desktop sticky scroll story — hidden below 900px via CSS */
+/* Desktop sticky scroll story — only mounted at ≥900px */
 
 .steps {
   min-width: 0;
@@ -25,7 +25,8 @@
 .phoneCluster {
   position: relative;
   display: block;
-  width: fit-content;
+  width: clamp(320px, 28vw, 390px);
+  max-height: calc(100svh - 140px);
   margin-inline: auto;
   background: transparent;
   border: 0;
@@ -34,8 +35,23 @@
   padding: 0;
   overflow: visible;
   isolation: auto;
-  transform: none;
+  transform:
+    translateY(calc((1 - var(--phone-handoff-progress, 0)) * -24px))
+    scale(calc(1 + (1 - var(--phone-handoff-progress, 0)) * 0.015));
+  opacity: var(--phone-handoff-progress, 0);
   transform-origin: center center;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.phoneCluster[data-handoff-ready="true"] {
+  pointer-events: auto;
+}
+
+.phoneCluster > *:first-child {
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .clusterDots {
@@ -45,19 +61,18 @@
   transform: translateY(-50%);
   z-index: 2;
   background: transparent;
+  opacity: var(--phone-handoff-progress, 0);
+  pointer-events: none;
 }
 
-/* Keep vertical dots beside the phone for all desktop widths (≥900px).
-   Do NOT reflow under the phone until the mobile breakpoint. */
-@media (max-width: 899px) {
-  .steps,
-  .phoneColumn {
-    display: none !important;
-  }
+.phoneCluster[data-handoff-ready="true"] .clusterDots {
+  pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .phoneCluster {
     transform: none !important;
+    opacity: var(--phone-handoff-progress, 0) !important;
+    will-change: opacity;
   }
 }

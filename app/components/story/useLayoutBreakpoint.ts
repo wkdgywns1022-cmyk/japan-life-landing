@@ -3,34 +3,39 @@
 import { useEffect, useState } from "react";
 import { COMPACT_MQ, DESKTOP_MQ } from "./features";
 
+export type LayoutMode = "desktop" | "mobile";
+
 /**
- * Layout-width breakpoint via matchMedia.
- * Never use user-agent strings for desktop vs mobile layout.
+ * Layout-width breakpoint via matchMedia (never user-agent).
+ * Returns null until mounted to avoid SSR/client layout mismatch.
  */
+export function useLayoutMode(): LayoutMode | null {
+  const [mode, setMode] = useState<LayoutMode | null>(null);
+
+  useEffect(() => {
+    const desktopMq = window.matchMedia(DESKTOP_MQ);
+    const sync = () => {
+      setMode(desktopMq.matches ? "desktop" : "mobile");
+    };
+    sync();
+    desktopMq.addEventListener("change", sync);
+    return () => desktopMq.removeEventListener("change", sync);
+  }, []);
+
+  return mode;
+}
+
+/** True below 900px. False until mounted (do not treat unknown as desktop). */
 export function useIsCompactLayout() {
-  const [isCompact, setIsCompact] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(COMPACT_MQ);
-    const sync = () => setIsCompact(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return isCompact;
+  const mode = useLayoutMode();
+  return mode === "mobile";
 }
 
+/** True at 900px+. False until mounted (do not treat unknown as desktop). */
 export function useIsDesktopLayout() {
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP_MQ);
-    const sync = () => setIsDesktop(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return isDesktop;
+  const mode = useLayoutMode();
+  return mode === "desktop";
 }
+
+/** Compact media query string for imperative checks */
+export { COMPACT_MQ };

@@ -156,12 +156,6 @@
   min-height: 1.3em;
 }
 
-@media (min-width: 900px) {
-  .showcase {
-    display: none;
-  }
-}
-
 @media (max-height: 650px) {
   .inner {
     gap: 4px;

@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { useReducedMotion } from "motion/react";
 import { useLocale } from "../hero/LocaleProvider";
@@ -35,6 +36,7 @@ type DesktopStoryContextValue = {
   floating: boolean;
   onPhoneEnter: () => void;
   onPhoneLeave: () => void;
+  phoneClusterRef: RefObject<HTMLDivElement | null> | null | undefined;
 };
 
 const DesktopStoryContext = createContext<DesktopStoryContextValue | null>(
@@ -62,6 +64,7 @@ type RootProps = {
   floating: boolean;
   onPhoneEnter: () => void;
   onPhoneLeave: () => void;
+  phoneClusterRef?: RefObject<HTMLDivElement | null> | null;
   children: ReactNode;
 };
 
@@ -75,6 +78,7 @@ function DesktopProductStoryRoot({
   floating,
   onPhoneEnter,
   onPhoneLeave,
+  phoneClusterRef,
   children,
 }: RootProps) {
   const { t, locale } = useLocale();
@@ -186,6 +190,7 @@ function DesktopProductStoryRoot({
       floating,
       onPhoneEnter,
       onPhoneLeave,
+      phoneClusterRef,
     }),
     [
       features,
@@ -199,6 +204,7 @@ function DesktopProductStoryRoot({
       floating,
       onPhoneEnter,
       onPhoneLeave,
+      phoneClusterRef,
     ],
   );
 
@@ -241,9 +247,9 @@ function DesktopProductPhone() {
     scrollToFeature,
     displayScreen,
     demoActive,
-    floating,
     onPhoneEnter,
     onPhoneLeave,
+    phoneClusterRef,
   } = useDesktopStory();
 
   return (
@@ -253,12 +259,13 @@ function DesktopProductPhone() {
         onMouseEnter={onPhoneEnter}
         onMouseLeave={onPhoneLeave}
       >
-        <div className={styles.phoneCluster}>
+        <div ref={phoneClusterRef ?? undefined} className={styles.phoneCluster}>
           <StoryPhone
             screen={displayScreen}
             demoActive={demoActive}
-            floating={floating}
+            floating={false}
             pauseOnHover
+            size="hero"
           />
           <div className={styles.clusterDots}>
             <ProgressDots

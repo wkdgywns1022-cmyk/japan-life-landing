@@ -23,13 +23,12 @@ import StoryPhone from "./StoryPhone";
 import {
   COMPACT_MQ,
   EXPLORE_HREF_DESKTOP,
-  EXPLORE_HREF_MOBILE,
   HERO_ID,
   PRODUCT_FEATURES,
   screenForStage,
   type StageId,
 } from "./features";
-import { useIsCompactLayout } from "./useLayoutBreakpoint";
+import { useLayoutMode } from "./useLayoutBreakpoint";
 import styles from "./PhoneJourney.module.css";
 
 const notoSans = Noto_Sans({
@@ -61,14 +60,17 @@ const HERO_SCREENS: PhoneScreenId[] = [
 ];
 
 /**
- * Single-page journey: shared hero + CTA, with layout-width product stories.
- * Desktop (≥900px): Hero two-column + DesktopProductStory below
- * Mobile (<900px): Hero stack + MobileProductShowcase
+ * Single page, single URL.
+ * Desktop (≥900): Hero + DesktopProductStory only
+ * Mobile (<900): Hero + MobileProductShowcase only
+ * Exactly one product controller is mounted.
  */
 export default function PhoneJourney() {
   const { locale, t } = useLocale();
   const reduceMotion = useReducedMotion();
-  const isCompact = useIsCompactLayout();
+  const layoutMode = useLayoutMode();
+  const isDesktop = layoutMode === "desktop";
+  const isMobile = layoutMode === "mobile";
   const hero = t.hero;
   const cta = t.finalCta;
 
@@ -81,6 +83,9 @@ export default function PhoneJourney() {
   const rotateTimerRef = useRef<number | null>(null);
   const journeyRef = useRef<HTMLDivElement>(null);
   const heroCopyRef = useRef<HTMLDivElement>(null);
+  const heroPhoneRef = useRef<HTMLDivElement>(null);
+  const storyClusterRef = useRef<HTMLDivElement>(null);
+  const handoffProgressRef = useRef(0);
 
   const clearRotate = useCallback(() => {
     if (rotateTimerRef.current !== null) {
@@ -95,8 +100,9 @@ export default function PhoneJourney() {
     setActiveStage(next);
   }, []);
 
+  // Mobile: only track hero visibility for hero-screen rotation pause
   useEffect(() => {
-    if (!isCompact || !heroNode) return;
+    if (!isMobile || !heroNode) return;
 
     const syncHero = () => {
       const rect = heroNode.getBoundingClientRect();
@@ -115,7 +121,7 @@ export default function PhoneJourney() {
       observer.disconnect();
       window.removeEventListener("scroll", syncHero);
     };
-  }, [isCompact, heroNode, setStageStable]);
+  }, [isMobile, heroNode, setStageStable]);
 
   useEffect(() => {
     clearRotate();
@@ -139,10 +145,11 @@ export default function PhoneJourney() {
     };
   }, [activeStage, reduceMotion, clearRotate]);
 
+  // Desktop only: sync story phone screen from active feature stage
   useEffect(() => {
+    if (!isDesktop) return;
     if (activeStage === HERO_ID) return;
     clearRotate();
-    if (isCompact) return;
 
     const target = screenForStage(activeStage);
     if (target === displayScreen) return;
@@ -150,22 +157,72 @@ export default function PhoneJourney() {
     const delay = reduceMotion ? 0 : PHONE_DELAY_MS;
     const id = window.setTimeout(() => setDisplayScreen(target), delay);
     return () => window.clearTimeout(id);
-  }, [activeStage, displayScreen, reduceMotion, clearRotate, isCompact]);
+  }, [
+    activeStage,
+    displayScreen,
+    reduceMotion,
+    clearRotate,
+    isDesktop,
+  ]);
 
+  // Desktop only: parallax + phone handoff
   useEffect(() => {
-    if (reduceMotion || isCompact) {
+    if (!isDesktop) {
       journeyRef.current?.style.setProperty("--hero-parallax", "0");
+      journeyRef.current?.style.setProperty("--phone-handoff-progress", "0");
+      handoffProgressRef.current = 0;
+      heroPhoneRef.current?.removeAttribute("data-handoff-done");
+      storyClusterRef.current?.removeAttribute("data-handoff-ready");
       return;
+    }
+
+    if (reduceMotion) {
+      journeyRef.current?.style.setProperty("--hero-parallax", "0");
     }
 
     let raf = 0;
     const update = () => {
-      if (!heroNode || !journeyRef.current) return;
-      const rect = heroNode.getBoundingClientRect();
-      const range = Math.max(rect.height * 0.55, 1);
-      const raw = Math.min(1, Math.max(0, -rect.top / range));
-      const value = activeStageRef.current === HERO_ID ? raw : Math.min(raw, 1);
-      journeyRef.current.style.setProperty("--hero-parallax", String(value));
+      const root = journeyRef.current;
+      const heroEl = heroNode;
+      if (!root || !heroEl) return;
+
+      const heroRect = heroEl.getBoundingClientRect();
+      const heroHeight = Math.max(heroRect.height, 1);
+      const scrolled = Math.max(0, -heroRect.top);
+
+      if (!reduceMotion) {
+        const parallaxRange = Math.max(heroHeight * 0.55, 1);
+        const parallax = Math.min(1, Math.max(0, scrolled / parallaxRange));
+        root.style.setProperty("--hero-parallax", String(parallax));
+      }
+
+      const handoffStart = heroHeight * 0.65;
+      const handoffRange = Math.max(heroHeight * 0.35, 1);
+      let progress = (scrolled - handoffStart) / handoffRange;
+      progress = Math.min(1, Math.max(0, progress));
+
+      if (heroRect.bottom < window.innerHeight * 0.42) {
+        progress = 1;
+      }
+
+      if (Math.abs(progress - handoffProgressRef.current) > 0.002) {
+        handoffProgressRef.current = progress;
+        root.style.setProperty(
+          "--phone-handoff-progress",
+          progress.toFixed(4),
+        );
+      }
+
+      const done = progress >= 0.98;
+      if (heroPhoneRef.current) {
+        if (done) heroPhoneRef.current.setAttribute("data-handoff-done", "true");
+        else heroPhoneRef.current.removeAttribute("data-handoff-done");
+      }
+      if (storyClusterRef.current) {
+        if (done)
+          storyClusterRef.current.setAttribute("data-handoff-ready", "true");
+        else storyClusterRef.current.removeAttribute("data-handoff-ready");
+      }
     };
 
     const onScroll = () => {
@@ -175,18 +232,20 @@ export default function PhoneJourney() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, [reduceMotion, locale, heroNode, isCompact]);
+  }, [reduceMotion, locale, heroNode, isDesktop]);
 
   const targetScreen = screenForStage(activeStage);
   const demoActive =
-    activeStage !== HERO_ID && displayScreen === targetScreen;
+    isDesktop && activeStage !== HERO_ID && displayScreen === targetScreen;
 
   const activeFeatureIndex =
-    activeStage === HERO_ID
+    !isDesktop || activeStage === HERO_ID
       ? -1
       : PRODUCT_FEATURES.findIndex((f) => f.id === activeStage);
 
@@ -198,13 +257,13 @@ export default function PhoneJourney() {
         : notoSans.className;
 
   const handlePhoneEnter = () => {
-    if (reduceMotion || activeStage !== HERO_ID) return;
+    if (!isDesktop || reduceMotion || activeStage !== HERO_ID) return;
     pausedRef.current = true;
     clearRotate();
   };
 
   const handlePhoneLeave = () => {
-    if (reduceMotion || activeStage !== HERO_ID) return;
+    if (!isDesktop || reduceMotion || activeStage !== HERO_ID) return;
     pausedRef.current = false;
     clearRotate();
     rotateTimerRef.current = window.setInterval(() => {
@@ -267,7 +326,6 @@ export default function PhoneJourney() {
           <a
             className={styles.btnSecondary}
             href={EXPLORE_HREF_DESKTOP}
-            data-mobile-href={EXPLORE_HREF_MOBILE}
             onClick={handleExploreClick}
           >
             <span className={styles.btnSecondaryText}>{hero.ctaExplore}</span>
@@ -280,11 +338,56 @@ export default function PhoneJourney() {
     </AnimatePresence>
   );
 
+  const heroSection = (
+    <section
+      id={HERO_ID}
+      ref={setHeroNode}
+      className={styles.heroStage}
+      aria-label="Hero"
+      data-layout={layoutMode ?? "pending"}
+    >
+      <div className={styles.heroInner}>
+        <div className={styles.heroTextColumn}>{heroCopy}</div>
+
+        {/* Desktop hero phone — mounted only on desktop */}
+        {isDesktop ? (
+          <div className={styles.heroPhoneColumn}>
+            <div
+              ref={heroPhoneRef}
+              className={styles.heroPhone}
+              onMouseEnter={handlePhoneEnter}
+              onMouseLeave={handlePhoneLeave}
+            >
+              <StoryPhone
+                screen={displayScreen}
+                demoActive={false}
+                floating={activeStage === HERO_ID}
+                size="hero"
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Mobile hero phone — mounted only on mobile */}
+      {isMobile ? (
+        <div className={styles.mobileHeroPhone}>
+          <StoryPhone
+            screen={displayScreen}
+            demoActive={false}
+            floating={false}
+            size="hero"
+          />
+        </div>
+      ) : null}
+    </section>
+  );
+
   return (
     <div
       ref={journeyRef}
       className={`${styles.journey} ${fontClass}`}
-      data-compact={isCompact ? "true" : "false"}
+      data-layout={layoutMode ?? "pending"}
     >
       <div className={styles.storyBg} aria-hidden="true" />
       <div className={styles.heroWash} aria-hidden="true" />
@@ -298,71 +401,36 @@ export default function PhoneJourney() {
         <LanguageSelector />
       </motion.header>
 
-      <DesktopProductStory
-        features={PRODUCT_FEATURES}
-        activeStage={activeStage}
-        onStageChange={setStageStable}
-        heroNode={heroNode}
-        displayScreen={displayScreen}
-        demoActive={demoActive}
-        floating={false}
-        onPhoneEnter={handlePhoneEnter}
-        onPhoneLeave={handlePhoneLeave}
-      >
-        {/* —— Hero: ends cleanly before product story —— */}
-        <section
-          id={HERO_ID}
-          ref={setHeroNode}
-          className={styles.heroStage}
-          aria-label="Hero"
+      {heroSection}
+
+      <div className={styles.blend} aria-hidden="true" />
+
+      {/* Exactly one product controller — never both */}
+      {isDesktop ? (
+        <DesktopProductStory
+          features={PRODUCT_FEATURES}
+          activeStage={activeStage}
+          onStageChange={setStageStable}
+          heroNode={heroNode}
+          displayScreen={displayScreen}
+          demoActive={demoActive}
+          floating={false}
+          onPhoneEnter={handlePhoneEnter}
+          onPhoneLeave={handlePhoneLeave}
+          phoneClusterRef={storyClusterRef}
         >
-          <div className={styles.heroInner}>
-            <div className={styles.heroTextColumn}>{heroCopy}</div>
-
-            <div className={styles.heroPhoneColumn}>
-              <div
-                className={styles.heroPhone}
-                onMouseEnter={handlePhoneEnter}
-                onMouseLeave={handlePhoneLeave}
-              >
-                <StoryPhone
-                  screen={displayScreen}
-                  demoActive={false}
-                  floating={activeStage === HERO_ID && !isCompact}
-                  size="hero"
-                />
-              </div>
+          <div className={styles.storyGrid}>
+            <div className={styles.storyCopy}>
+              <DesktopProductStory.Steps />
             </div>
+            <DesktopProductStory.Phone />
           </div>
+        </DesktopProductStory>
+      ) : null}
 
-          <div className={styles.mobileHeroPhone}>
-            <div
-              onMouseEnter={handlePhoneEnter}
-              onMouseLeave={handlePhoneLeave}
-            >
-              <StoryPhone
-                screen={displayScreen}
-                demoActive={false}
-                floating={false}
-                size="hero"
-              />
-            </div>
-          </div>
-        </section>
-
-        <div className={styles.blend} aria-hidden="true" />
-
-        {/* —— Desktop product story (steps + sticky phone + dots) —— */}
-        <div className={styles.storyGrid}>
-          <div className={styles.storyCopy}>
-            <DesktopProductStory.Steps />
-          </div>
-          <DesktopProductStory.Phone />
-        </div>
-
-        {/* —— Mobile showcase only (hidden ≥900px) —— */}
+      {isMobile ? (
         <MobileProductShowcase features={PRODUCT_FEATURES} />
-      </DesktopProductStory>
+      ) : null}
 
       <div
         id="beta"

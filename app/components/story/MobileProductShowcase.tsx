@@ -10,7 +10,6 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale } from "../hero/LocaleProvider";
 import type { ProductFeature } from "./features";
-import { COMPACT_MQ } from "./features";
 import ProgressDots from "./ProgressDots";
 import StoryPhone from "./StoryPhone";
 import styles from "./MobileProductShowcase.module.css";
@@ -28,11 +27,11 @@ const DEMO_START_DELAY_MS = 520;
 
 /**
  * Mobile showcase (<900px): fit-to-viewport composition + pointer swipe + direct dots.
+ * Only mounted when layout mode is mobile — no desktop observers.
  */
 export default function MobileProductShowcase({ features }: Props) {
   const { t, locale } = useLocale();
   const reduceMotion = useReducedMotion();
-  const [enabled, setEnabled] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [navigationSource, setNavigationSource] =
     useState<NavigationSource>("initial");
@@ -64,20 +63,11 @@ export default function MobileProductShowcase({ features }: Props) {
   }, []);
 
   useEffect(() => {
-    const mq = window.matchMedia(COMPACT_MQ);
-    const sync = () => setEnabled(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
     return () => clearTimers();
   }, [clearTimers]);
 
   const goToFeature = useCallback(
     (targetIndex: number, source: NavigationSource) => {
-      if (!enabled) return;
       const clamped = Math.max(0, Math.min(features.length - 1, targetIndex));
       if (clamped === activeIndexRef.current && source !== "locale") return;
 
@@ -104,7 +94,7 @@ export default function MobileProductShowcase({ features }: Props) {
         }, reduceMotion ? 0 : Math.max(0, DEMO_START_DELAY_MS - settleMs));
       }, settleMs);
     },
-    [enabled, features.length, clearTimers, schedule, reduceMotion],
+    [features.length, clearTimers, schedule, reduceMotion],
   );
 
   const onDotSelect = useCallback(
@@ -118,7 +108,7 @@ export default function MobileProductShowcase({ features }: Props) {
   );
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (!enabled || e.button === 2) return;
+    if (e.button === 2) return;
     const target = e.target as HTMLElement | null;
     if (target?.closest("button, a, input, textarea")) return;
 
@@ -185,7 +175,7 @@ export default function MobileProductShowcase({ features }: Props) {
       /* ignore */
     }
 
-    if (!wasHorizontal || !enabled) return;
+    if (!wasHorizontal) return;
 
     if (dx <= -SWIPE_THRESHOLD_PX) {
       goToFeature(activeIndexRef.current + 1, "swipe");
@@ -208,7 +198,7 @@ export default function MobileProductShowcase({ features }: Props) {
     label: t.progress[f.progressKey],
   }));
 
-  const demoActive = enabled && demoReady && !transitioning && !reduceMotion;
+  const demoActive = demoReady && !transitioning && !reduceMotion;
   const reduced = Boolean(reduceMotion);
 
   return (
@@ -240,9 +230,9 @@ export default function MobileProductShowcase({ features }: Props) {
                       opacity: 1,
                       y: 0,
                       transition: {
-                        duration: 0.46,
+                        duration: 0.44,
                         ease: appleEase,
-                        delay: 0.1,
+                        delay: 0.08,
                       },
                     }
               }
@@ -251,7 +241,7 @@ export default function MobileProductShowcase({ features }: Props) {
                   ? { opacity: 0, transition: { duration: 0.12 } }
                   : {
                       opacity: 0,
-                      y: -6,
+                      y: -4,
                       transition: { duration: 0.2, ease: appleEase },
                     }
               }
