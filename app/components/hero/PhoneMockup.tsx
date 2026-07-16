@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { PhoneScreenId } from "./i18n";
 import HomeScreen from "./screens/HomeScreen";
@@ -16,30 +16,66 @@ const SCREENS: PhoneScreenId[] = [
   "expense",
 ];
 
-const INTERVAL_MS = 2000;
-const ease = [0.22, 1, 0.36, 1] as const;
+const DISPLAY_MS = 2200;
+const TRANSITION_S = 0.7;
+const START_DELAY_MS = 1400;
 
 export default function PhoneMockup() {
   const reduceMotion = useReducedMotion();
   const [screen, setScreen] = useState<PhoneScreenId>("home");
-  const [ready, setReady] = useState(false);
+  const pausedRef = useRef(false);
+  const readyRef = useRef(false);
+  const timerRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (reduceMotion) return;
-    const start = window.setTimeout(() => setReady(true), 1400);
-    return () => window.clearTimeout(start);
-  }, [reduceMotion]);
+  const clearTimer = useCallback(() => {
+    if (timerRef.current !== null) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
 
-  useEffect(() => {
-    if (reduceMotion || !ready) return;
-    const id = window.setInterval(() => {
+  const startTimer = useCallback(() => {
+    clearTimer();
+    if (reduceMotion || pausedRef.current || !readyRef.current) return;
+
+    timerRef.current = window.setInterval(() => {
       setScreen((current) => {
         const index = SCREENS.indexOf(current);
         return SCREENS[(index + 1) % SCREENS.length];
       });
-    }, INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [reduceMotion, ready]);
+    }, DISPLAY_MS);
+  }, [clearTimer, reduceMotion]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      readyRef.current = false;
+      pausedRef.current = false;
+      clearTimer();
+      return;
+    }
+
+    const startId = window.setTimeout(() => {
+      readyRef.current = true;
+      startTimer();
+    }, START_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(startId);
+      clearTimer();
+    };
+  }, [reduceMotion, clearTimer, startTimer]);
+
+  const handleMouseEnter = () => {
+    if (reduceMotion) return;
+    pausedRef.current = true;
+    clearTimer();
+  };
+
+  const handleMouseLeave = () => {
+    if (reduceMotion) return;
+    pausedRef.current = false;
+    startTimer();
+  };
 
   const content = (() => {
     switch (screen) {
@@ -58,7 +94,12 @@ export default function PhoneMockup() {
     screen === "home" || screen === "checklist" || screen === "expense";
 
   return (
-    <div className={styles.stage} aria-hidden="true">
+    <div
+      className={styles.stage}
+      aria-hidden="true"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className={styles.glow} />
       <div className={styles.device}>
         <span className={styles.silent} />
@@ -74,10 +115,10 @@ export default function PhoneMockup() {
               <motion.div
                 key={screen}
                 className={styles.screenLayer}
-                initial={reduceMotion ? false : { opacity: 0, x: 6 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, x: -6 }}
-                transition={{ duration: 0.4, ease }}
+                initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+                transition={{ duration: TRANSITION_S, ease: "easeInOut" }}
               >
                 {content}
               </motion.div>
