@@ -235,6 +235,81 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
+  min-height: 56px;
+  box-sizing: border-box;
+}
+
+.phraseCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  min-height: 118px;
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+.phraseJa {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.35;
+  color: var(--lp-text-primary);
+}
+
+.phraseSub {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lp-text-secondary);
+  line-height: 1.35;
+}
+
+.phraseCat {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lp-primary);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--lp-radius-sm);
+  background: var(--lp-surface);
+  border: 1px solid color-mix(in srgb, var(--lp-border) 60%, transparent);
+  box-shadow: var(--lp-shadow-card);
+  color: var(--lp-text-tertiary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.chipPill {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 980px;
+  background: var(--lp-surface);
+  border: 1px solid color-mix(in srgb, var(--lp-border) 60%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lp-text-secondary);
+  white-space: nowrap;
+}
+
+.chipPillActive {
+  background: var(--lp-primary-bg);
+  border-color: transparent;
+  color: var(--lp-primary);
 }
 
 .check {

@@ -12,7 +12,11 @@ import {
 import { useLocale } from "./LocaleProvider";
 import styles from "./AppScreens.module.css";
 
-function BottomNav({ active }: { active: "garbage" | "expense" | "checklist" }) {
+function BottomNav({
+  active,
+}: {
+  active: "garbage" | "expense" | "checklist" | "home";
+}) {
   const { t } = useLocale();
   const items = [
     { id: "expense" as const, label: t.navExpense, Icon: IconWallet },
@@ -191,6 +195,46 @@ export function AppChecklistScreen() {
         <div className={styles.addBtn}>{t.addTask}</div>
       </div>
       <BottomNav active="checklist" />
+    </div>
+  );
+}
+
+export function AppJapaneseScreen() {
+  const { t } = useLocale();
+
+  const phrases = [
+    { ja: t.phrase1Ja, sub: t.phrase1Sub, cat: t.wardCatMoving },
+    { ja: t.phrase2Ja, sub: t.phrase2Sub, cat: t.wardCatMoving },
+    { ja: t.phrase3Ja, sub: t.phrase3Sub, cat: t.wardCatNhi },
+  ];
+
+  return (
+    <div className={styles.screen}>
+      <div className={styles.body}>
+        <div>
+          <h2 className={styles.title}>{t.wardTitle}</h2>
+          <p className={styles.subtitle}>{t.wardSubtitle}</p>
+        </div>
+
+        <div className={styles.search}>{t.wardSearch}</div>
+
+        <div className={styles.chips}>
+          <span className={`${styles.chipPill} ${styles.chipPillActive}`}>
+            {t.wardAll}
+          </span>
+          <span className={styles.chipPill}>{t.wardCatMoving}</span>
+          <span className={styles.chipPill}>{t.wardCatNhi}</span>
+        </div>
+
+        {phrases.map((phrase) => (
+          <div key={phrase.ja} className={`${styles.card} ${styles.phraseCard}`}>
+            <p className={styles.phraseCat}>{phrase.cat}</p>
+            <p className={styles.phraseJa}>{phrase.ja}</p>
+            <p className={styles.phraseSub}>{phrase.sub}</p>
+          </div>
+        ))}
+      </div>
+      <BottomNav active="home" />
     </div>
   );
 }

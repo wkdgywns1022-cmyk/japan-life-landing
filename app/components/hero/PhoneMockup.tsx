@@ -6,14 +6,15 @@ import AppHomeScreen from "./AppHomeScreen";
 import {
   AppChecklistScreen,
   AppExpenseScreen,
-  AppGarbageScreen,
+  AppJapaneseScreen,
 } from "./AppScreens";
 import styles from "./PhoneMockup.module.css";
 
-const SCREENS = ["home", "garbage", "expense", "checklist"] as const;
+const SCREENS = ["home", "checklist", "japanese", "expense"] as const;
 type ScreenId = (typeof SCREENS)[number];
 
-const INTERVAL_MS = 3600;
+const INTERVAL_MS = 2000;
+const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function PhoneMockup() {
   const reduceMotion = useReducedMotion();
@@ -23,7 +24,7 @@ export default function PhoneMockup() {
   useEffect(() => {
     if (reduceMotion) return;
 
-    const start = window.setTimeout(() => setReady(true), 1200);
+    const start = window.setTimeout(() => setReady(true), 1400);
     return () => window.clearTimeout(start);
   }, [reduceMotion]);
 
@@ -42,12 +43,12 @@ export default function PhoneMockup() {
 
   const content = (() => {
     switch (screen) {
-      case "garbage":
-        return <AppGarbageScreen key="garbage" />;
-      case "expense":
-        return <AppExpenseScreen key="expense" />;
       case "checklist":
         return <AppChecklistScreen key="checklist" />;
+      case "japanese":
+        return <AppJapaneseScreen key="japanese" />;
+      case "expense":
+        return <AppExpenseScreen key="expense" />;
       default:
         return <AppHomeScreen key="home" activeTab="home" />;
     }
@@ -79,10 +80,14 @@ export default function PhoneMockup() {
               <motion.div
                 key={screen}
                 className={styles.screenLayer}
-                initial={reduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                initial={
+                  reduceMotion ? false : { opacity: 0, x: 14 }
+                }
+                animate={{ opacity: 1, x: 0 }}
+                exit={
+                  reduceMotion ? undefined : { opacity: 0, x: -10 }
+                }
+                transition={{ duration: 0.48, ease }}
               >
                 {content}
               </motion.div>

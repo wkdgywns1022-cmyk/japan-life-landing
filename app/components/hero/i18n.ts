@@ -75,6 +75,19 @@ type Dict = {
   taskNhi: string;
   taskBank: string;
   addTask: string;
+
+  wardTitle: string;
+  wardSubtitle: string;
+  wardSearch: string;
+  wardAll: string;
+  wardCatMoving: string;
+  wardCatNhi: string;
+  phrase1Ja: string;
+  phrase1Sub: string;
+  phrase2Ja: string;
+  phrase2Sub: string;
+  phrase3Ja: string;
+  phrase3Sub: string;
 };
 
 export const dictionaries: Record<Locale, Dict> = {
@@ -147,6 +160,19 @@ export const dictionaries: Record<Locale, Dict> = {
     taskNhi: "국민건강보험",
     taskBank: "은행 계좌",
     addTask: "일정 또는 할 일 추가",
+
+    wardTitle: "구청·시청 일본어",
+    wardSubtitle: "구청·시청 창구에서 바로 쓸 수 있는 일본어 표현",
+    wardSearch: "표현 검색",
+    wardAll: "전체",
+    wardCatMoving: "전입신고",
+    wardCatNhi: "국민건강보험",
+    phrase1Ja: "転入届を出しに来ました。",
+    phrase1Sub: "전입신고를 하러 왔습니다.",
+    phrase2Ja: "在留カードの住所を変更したいです。",
+    phrase2Sub: "재류카드의 주소를 변경하고 싶습니다.",
+    phrase3Ja: "国民健康保険に加入したいです。",
+    phrase3Sub: "국민건강보험에 가입하고 싶습니다.",
   },
   en: {
     brand: "LifePass Japan",
@@ -217,6 +243,19 @@ export const dictionaries: Record<Locale, Dict> = {
     taskNhi: "National Health Insurance",
     taskBank: "Bank account",
     addTask: "Add schedule or task",
+
+    wardTitle: "Ward Office Japanese",
+    wardSubtitle: "Useful Japanese phrases for ward and city office counters",
+    wardSearch: "Search phrases",
+    wardAll: "All",
+    wardCatMoving: "Moving-in notification",
+    wardCatNhi: "National Health Insurance",
+    phrase1Ja: "転入届を出しに来ました。",
+    phrase1Sub: "I came to submit my moving-in notification.",
+    phrase2Ja: "在留カードの住所を変更したいです。",
+    phrase2Sub: "I would like to change the address on my residence card.",
+    phrase3Ja: "国民健康保険に加入したいです。",
+    phrase3Sub: "I would like to enroll in National Health Insurance.",
   },
   ja: {
     brand: "LifePass Japan",
@@ -287,5 +326,18 @@ export const dictionaries: Record<Locale, Dict> = {
     taskNhi: "国民健康保険",
     taskBank: "銀行口座",
     addTask: "予定・タスクを追加",
+
+    wardTitle: "区役所・市役所の日本語",
+    wardSubtitle: "区役所・市役所の窓口ですぐ使える日本語表現",
+    wardSearch: "フレーズを検索",
+    wardAll: "すべて",
+    wardCatMoving: "転入届",
+    wardCatNhi: "国民健康保険",
+    phrase1Ja: "転入届を出しに来ました。",
+    phrase1Sub: "転入届の窓口で使う表現",
+    phrase2Ja: "在留カードの住所を変更したいです。",
+    phrase2Sub: "在留カードの住所変更で使う表現",
+    phrase3Ja: "国民健康保険に加入したいです。",
+    phrase3Sub: "国民健康保険の加入手続きで使う表現",
   },
 };
