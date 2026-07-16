@@ -1,0 +1,125 @@
+/* Desktop continuous experience — one sticky phone beside Hero + Story */
+
+.experience {
+  position: relative;
+  z-index: 1;
+  width: var(--desktop-page-width, min(1180px, calc(100% - 4rem)));
+  margin-inline: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 2rem;
+  overflow: visible;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.08fr)
+    minmax(340px, 0.72fr);
+  align-items: start;
+  gap: var(--desktop-hero-gap, clamp(56px, 7vw, 112px));
+  width: 100%;
+  overflow: visible;
+}
+
+.textFlow {
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+}
+
+.heroBlock {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 5rem 3rem;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.storySteps {
+  min-width: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.phoneRail {
+  position: relative;
+  min-height: 100%;
+  min-width: 0;
+  z-index: 2;
+  /* Must NOT create a sticky-blocking containing block */
+  overflow: visible;
+  transform: none;
+  filter: none;
+  perspective: none;
+  contain: none;
+}
+
+.stickyPhone {
+  position: sticky;
+  top: clamp(72px, 9vh, 108px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100svh - 140px);
+  background: transparent;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.phoneCluster {
+  position: relative;
+  display: block;
+  width: var(--desktop-story-phone-width, clamp(330px, 27vw, 390px));
+  max-height: calc(100svh - 140px);
+  margin-inline: auto;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+  isolation: auto;
+  pointer-events: none;
+}
+
+.phoneCluster > *:first-child {
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.clusterDots {
+  position: absolute;
+  left: calc(100% + 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.clusterDots[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clusterDots {
+    transition: none;
+  }
+}
+
+/* Hidden below desktop — component should also be unmounted */
+@media (max-width: 899px) {
+  .experience {
+    display: none;
+  }
+}

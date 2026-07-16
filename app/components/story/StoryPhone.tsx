@@ -137,12 +137,7 @@ export default function StoryPhone({
                     ? { opacity: 0, scale: 0.995 }
                     : legacyMobileMotion
                       ? { opacity: 0, y: 10, scale: 0.985 }
-                      : {
-                          opacity: 0,
-                          y: 8,
-                          scale: 0.992,
-                          filter: "blur(2px)",
-                        }
+                      : { opacity: 0, scale: 0.995 }
               }
               animate={
                 reduced
@@ -160,9 +155,11 @@ export default function StoryPhone({
                       ? { opacity: 1, y: 0, scale: 1 }
                       : {
                           opacity: 1,
-                          y: 0,
                           scale: 1,
-                          filter: "blur(0px)",
+                          transition: {
+                            opacity: { duration: 0.48, ease: appleEase },
+                            scale: { duration: 0.48, ease: appleEase },
+                          },
                         }
               }
               exit={
@@ -181,9 +178,11 @@ export default function StoryPhone({
                       ? { opacity: 0, y: -8, scale: 0.985 }
                       : {
                           opacity: 0,
-                          y: -5,
-                          scale: 0.992,
-                          filter: "blur(2px)",
+                          scale: 0.995,
+                          transition: {
+                            opacity: { duration: 0.26, ease: appleEase },
+                            scale: { duration: 0.26, ease: appleEase },
+                          },
                         }
               }
               transition={
@@ -197,12 +196,7 @@ export default function StoryPhone({
                           y: { duration: 0.5, ease: "easeInOut" },
                           scale: { duration: 0.5, ease: "easeInOut" },
                         }
-                      : {
-                          opacity: { duration: 0.55, ease: appleEase },
-                          y: { duration: 0.58, ease: appleEase },
-                          scale: { duration: 0.58, ease: appleEase },
-                          filter: { duration: 0.45, ease: appleEase },
-                        }
+                      : undefined
               }
             >
               <ScreenContent

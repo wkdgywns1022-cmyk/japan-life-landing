@@ -42,10 +42,6 @@
 @media (max-width: 899px) {
   .wrap {
     will-change: auto;
-    display: block;
-    margin-inline: auto;
-    width: fit-content;
-    max-width: 100%;
   }
 
   .screenLayer {

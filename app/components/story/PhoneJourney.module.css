@@ -1,6 +1,5 @@
 .journey {
   --hero-parallax: 0;
-  --phone-handoff-progress: 0;
   position: relative;
   isolation: isolate;
   background: linear-gradient(
@@ -53,15 +52,16 @@
   min-height: 100svh;
   height: auto;
   margin: 0;
+  /* Horizontal padding lives on text only — phone centers to the viewport */
   padding:
     12px
-    20px
+    0
     calc(48px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
 }
 
 .heroInner {
@@ -70,6 +70,9 @@
   align-items: center;
   gap: 0;
   width: 100%;
+  max-width: 100%;
+  padding-inline: 20px;
+  box-sizing: border-box;
 }
 
 .heroTextColumn {
@@ -235,27 +238,36 @@
 
 .mobileHeroPhoneArea {
   width: 100%;
-  max-width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline: auto;
   margin-top: 36px;
+  margin-inline: 0;
   padding-inline: 0;
   position: relative;
   box-sizing: border-box;
 }
 
 .mobileHeroPhone {
-  display: block;
-  margin-inline: auto;
+  margin: 0 auto;
+  position: relative;
+  left: auto;
+  right: auto;
+  transform: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex: 0 0 auto;
+  overflow: visible;
+  padding: 0;
+}
+
+.mobileHeroPhone > * {
+  margin-left: 0;
+  margin-right: 0;
   transform: none;
   left: auto;
   right: auto;
-  position: relative;
-  overflow: visible;
-  padding: 0;
 }
 
 .blend {
@@ -348,8 +360,11 @@
 
 @media (max-width: 360px) {
   .header,
-  .heroStage,
   .finalCta {
+    padding-inline: 16px;
+  }
+
+  .heroInner {
     padding-inline: 16px;
   }
 
@@ -367,13 +382,13 @@
 /* —— Desktop ≥900px —— */
 @media (min-width: 900px) {
   .journey {
+    /* Sticky phone requires no overflow clip on ancestors */
     overflow-x: visible;
+    overflow-y: visible;
   }
 
   .heroWash {
     height: 110svh;
-    opacity: calc(1 - var(--hero-parallax) * 0.85);
-    transition: opacity 200ms linear;
     pointer-events: none;
   }
 
@@ -388,26 +403,17 @@
     z-index: 12;
   }
 
-  .heroStage {
-    position: relative;
-    z-index: 5;
-    width: var(--desktop-page-width);
-    margin-inline: auto;
-    min-height: 100svh;
-    padding-block: 5rem 3rem;
-    padding-inline: 0;
-    justify-content: center;
-    align-items: stretch;
-  }
-
-  .heroInner {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1.08fr)
-      minmax(340px, 0.72fr);
-    align-items: center;
-    gap: var(--desktop-hero-gap);
-    width: 100%;
+  /* Mobile hero chrome unused on desktop */
+  .heroStage,
+  .heroInner,
+  .heroPhoneColumn,
+  .heroPhone,
+  .mobileHeroPhoneArea,
+  .mobileHeroPhone,
+  .blend,
+  .storyGrid,
+  .storyCopy {
+    display: none;
   }
 
   .heroTextColumn {
@@ -427,16 +433,11 @@
     text-align: left;
     max-width: 100%;
     width: 100%;
-    min-height: 28rem;
+    min-height: 0;
     margin-inline: 0;
-    transform:
-      translateY(calc(var(--hero-parallax) * -12px + var(--phone-handoff-progress) * -16px))
-      scale(calc(1 - var(--hero-parallax) * 0.015));
-    opacity: calc(
-      (1 - var(--hero-parallax) * 0.08) * (1 - var(--phone-handoff-progress) * 0.55)
-    );
-    transform-origin: left center;
-    will-change: transform, opacity;
+    transform: none;
+    opacity: 1;
+    will-change: auto;
     pointer-events: auto;
   }
 
@@ -532,78 +533,6 @@
     justify-content: flex-start;
   }
 
-  .heroPhoneColumn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    position: relative;
-    z-index: 2;
-  }
-
-  .heroPhone {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--desktop-story-phone-width);
-    max-height: calc(100svh - 140px);
-    margin: 0;
-    transform:
-      translateY(calc(var(--phone-handoff-progress) * 32px))
-      scale(calc(1 + var(--phone-handoff-progress) * 0.015));
-    opacity: calc(1 - var(--phone-handoff-progress));
-    transform-origin: center center;
-    will-change: transform, opacity;
-    pointer-events: none;
-  }
-
-  .heroPhone > * {
-    max-width: 100%;
-    pointer-events: none;
-  }
-
-  .mobileHeroPhoneArea,
-  .mobileHeroPhone {
-    display: none;
-  }
-
-  .blend {
-    height: 24px;
-    pointer-events: none;
-  }
-
-  /*
-   * Product story is pulled up for phone handoff continuity.
-   * It must not intercept Hero CTA clicks — disable hit-testing on the
-   * overlapping grid, then re-enable only the story phone cluster.
-   */
-  .storyGrid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1.08fr)
-      minmax(340px, 0.72fr);
-    gap: var(--desktop-hero-gap);
-    align-items: start;
-    width: var(--desktop-page-width);
-    margin-inline: auto;
-    margin-top: calc(-1 * min(300px, 34vh));
-    max-width: 100%;
-    box-sizing: border-box;
-    padding-bottom: 2rem;
-    pointer-events: none;
-  }
-
-  .storyCopy {
-    display: block;
-    min-width: 0;
-    max-width: 100%;
-    padding-top: min(300px, 34vh);
-    pointer-events: none;
-  }
-
   .finalCta {
     width: min(1080px, calc(100% - 3rem));
     padding: 5rem 0 2.5rem;
@@ -625,7 +554,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .heroCopy,
-  .heroPhone,
   .heroWash {
     transform: none !important;
     filter: none !important;
@@ -635,10 +563,6 @@
 
   .heroCopy {
     opacity: 1 !important;
-  }
-
-  .heroPhone {
-    opacity: calc(1 - var(--phone-handoff-progress)) !important;
   }
 
   .btnPrimary:hover,
