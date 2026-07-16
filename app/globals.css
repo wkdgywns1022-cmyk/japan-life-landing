@@ -1,26 +1,25 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--lp-hero-bg);
+  --foreground: var(--lp-text-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-lp-primary: var(--lp-primary);
+  --color-lp-background: var(--lp-background);
+  --color-lp-surface: var(--lp-surface);
+  --color-lp-text-primary: var(--lp-text-primary);
+  --color-lp-text-secondary: var(--lp-text-secondary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--lp-hero-bg);
+  color: var(--lp-text-primary);
+  font-family: var(--font-geist-sans), "Noto Sans KR", sans-serif;
 }
