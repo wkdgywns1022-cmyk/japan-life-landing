@@ -38,35 +38,36 @@
   z-index: 3;
 }
 
-.grid {
+/* —— Desktop Hero —— */
+.heroStage {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
-  gap: 3rem 4rem;
-  align-items: start;
+  overflow: visible;
+  min-height: 100svh;
+  box-sizing: border-box;
   width: min(1180px, calc(100% - 4rem));
   margin-inline: auto;
   max-width: 100%;
-  box-sizing: border-box;
-}
-
-.copyColumn {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.heroStage {
-  min-height: 100svh;
+  padding-block: 5rem 3rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-block: 5rem 3rem;
-  box-sizing: border-box;
+}
+
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+  align-items: center;
+  gap: clamp(48px, 7vw, 112px);
+  width: 100%;
+}
+
+.heroTextColumn {
+  min-width: 0;
 }
 
 .heroCopy {
-  max-width: 36rem;
+  max-width: 680px;
   transform:
     translateY(calc(var(--hero-parallax) * -12px))
     scale(calc(1 - var(--hero-parallax) * 0.015));
@@ -85,11 +86,14 @@
 
 .headline {
   margin: 0;
-  font-size: clamp(2.75rem, 6.4vw, 4.75rem);
+  max-width: 680px;
+  font-size: clamp(3.5rem, 6vw, 6rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.08;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
   color: var(--lp-text-primary);
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .subtitle {
@@ -188,6 +192,29 @@
   transform: translateX(3px);
 }
 
+.heroPhoneColumn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.heroPhone {
+  position: relative;
+  width: clamp(320px, 28vw, 390px);
+  max-height: calc(100svh - 140px);
+  margin: 0;
+  transform: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroPhone > * {
+  max-width: 100%;
+}
+
+/* Mobile-only hero phone — never on desktop */
 .mobileHeroPhone {
   display: none;
 }
@@ -196,6 +223,26 @@
   height: 64px;
   background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.9) 100%);
   pointer-events: none;
+}
+
+/* —— Desktop product story (after Hero) —— */
+.storyGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
+  gap: 3rem 4rem;
+  align-items: start;
+  width: min(1180px, calc(100% - 4rem));
+  margin-inline: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 2rem;
+}
+
+.storyCopy {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .finalCta {
@@ -256,7 +303,7 @@
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.34);
 }
 
-/* —— Small tablet + mobile: compact layout —— */
+/* —— Compact / mobile only —— */
 @media (max-width: 899px) {
   .journey {
     overflow-x: clip;
@@ -277,43 +324,41 @@
     z-index: 3;
   }
 
-  .grid {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 100%;
-    gap: 0;
-    padding-inline: 22px;
-    box-sizing: border-box;
-    overflow: visible;
-    transform: none;
-    filter: none;
-  }
-
-  .copyColumn {
-    overflow: visible;
-    transform: none;
-    filter: none;
-  }
-
   .heroWash {
     height: 100svh;
     opacity: 1;
   }
 
   .heroStage {
+    width: 100%;
+    max-width: 100%;
     min-height: 100svh;
     height: auto;
-    max-height: none;
-    justify-content: flex-start;
-    align-items: center;
+    margin: 0;
     padding:
       12px
-      0
+      22px
       calc(48px + env(safe-area-inset-bottom, 0px));
-    gap: 0;
-    overflow: visible;
+    justify-content: flex-start;
+    align-items: center;
     box-sizing: border-box;
+  }
+
+  /* Disable desktop two-column hero on mobile */
+  .heroInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .heroPhoneColumn {
+    display: none !important;
+  }
+
+  .heroTextColumn {
+    width: 100%;
   }
 
   .heroCopy {
@@ -336,6 +381,7 @@
   }
 
   .headline {
+    max-width: none;
     font-size: clamp(2.375rem, 10.5vw, 2.875rem);
     letter-spacing: -0.03em;
     line-height: 1.1;
@@ -402,6 +448,11 @@
     height: 32px;
   }
 
+  /* Desktop story grid never active on mobile */
+  .storyGrid {
+    display: none !important;
+  }
+
   .finalCta {
     width: 100%;
     max-width: 100%;
@@ -418,7 +469,6 @@
   }
 }
 
-/* —— Mobile primary layout —— */
 @media (max-width: 767px) {
   .header {
     padding:
@@ -427,11 +477,8 @@
       0;
   }
 
-  .grid {
-    padding-inline: 20px;
-  }
-
   .heroStage {
+    padding-inline: 20px;
     padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
   }
 
@@ -476,7 +523,7 @@
     padding-inline: 16px;
   }
 
-  .grid {
+  .heroStage {
     padding-inline: 16px;
   }
 

@@ -1,0 +1,43 @@
+.statusIcons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  min-width: max-content;
+  width: max-content;
+  line-height: 1;
+  color: currentColor;
+  transform: none;
+}
+
+.svg {
+  display: block;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  transform: none;
+  box-sizing: content-box;
+}
+
+/* Locked logical canvas sizes — never overridden by parent % sizing */
+.cellular {
+  width: 18px;
+  height: 12px;
+}
+
+.wifi {
+  width: 17px;
+  height: 12px;
+}
+
+.battery {
+  width: 27px;
+  height: 12px;
+}

@@ -173,6 +173,10 @@ export type ProgressCopy = {
   shortcuts: string;
 };
 
+export type ShowcaseCopy = {
+  swipeHint: string;
+};
+
 export type Translations = {
   hero: HeroCopy;
   nav: NavCopy;
@@ -186,6 +190,7 @@ export type Translations = {
   };
   finalCta: FinalCtaCopy;
   progress: ProgressCopy;
+  showcase: ShowcaseCopy;
   phone: {
     home: HomeCopy;
     checklist: ChecklistCopy;
@@ -293,6 +298,9 @@ export const translations: Record<Locale, Translations> = {
       japanese: "구청 일본어로 이동",
       expense: "지출로 이동",
       shortcuts: "생활 바로가기로 이동",
+    },
+    showcase: {
+      swipeHint: "좌우로 넘겨 기능을 확인하세요",
     },
     phone: {
       home: {
@@ -498,6 +506,9 @@ export const translations: Record<Locale, Translations> = {
       expense: "Go to expenses",
       shortcuts: "Go to life shortcuts",
     },
+    showcase: {
+      swipeHint: "Swipe to explore features",
+    },
     phone: {
       home: {
         greeting: "Good evening",
@@ -701,6 +712,9 @@ export const translations: Record<Locale, Translations> = {
       japanese: "区役所の日本語へ移動",
       expense: "家計へ移動",
       shortcuts: "生活ショートカットへ移動",
+    },
+    showcase: {
+      swipeHint: "左右にスワイプして機能を確認",
     },
     phone: {
       home: {

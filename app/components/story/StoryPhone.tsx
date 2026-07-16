@@ -18,9 +18,11 @@ type Props = {
   screen: PhoneScreenId;
   demoActive?: boolean;
   floating?: boolean;
-  size?: "hero" | "story";
+  size?: "hero" | "story" | "showcase";
   /** When true, hover pauses micro-demo (product-story). Hero leaves false. */
   pauseOnHover?: boolean;
+  /** Mobile showcase uses a quieter cross-fade (no blur / large slide). */
+  motionPreset?: "default" | "mobileShowcase";
 };
 
 function ScreenContent({
@@ -60,6 +62,7 @@ export default function StoryPhone({
   floating = false,
   size = "story",
   pauseOnHover = false,
+  motionPreset = "default",
 }: Props) {
   const reduceMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -80,7 +83,8 @@ export default function StoryPhone({
     const node = wrapRef.current;
     if (!node) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio > 0.15),
+      ([entry]) =>
+        setInView(entry.isIntersecting && entry.intersectionRatio > 0.15),
       { threshold: [0, 0.15, 0.35] },
     );
     observer.observe(node);
@@ -88,7 +92,8 @@ export default function StoryPhone({
   }, []);
 
   useEffect(() => {
-    const onVisibility = () => setPageVisible(document.visibilityState === "visible");
+    const onVisibility = () =>
+      setPageVisible(document.visibilityState === "visible");
     onVisibility();
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
@@ -98,7 +103,10 @@ export default function StoryPhone({
     Boolean(demoActive) && inView && pageVisible && !reduceMotion;
   const demoPaused = pauseOnHover && hovered;
 
-  const mobileMotion = isCompact && !reduceMotion;
+  const showcaseMotion =
+    motionPreset === "mobileShowcase" && !reduceMotion;
+  const legacyMobileMotion =
+    motionPreset === "default" && isCompact && !reduceMotion;
   const reduced = Boolean(reduceMotion);
 
   return (
@@ -125,54 +133,76 @@ export default function StoryPhone({
               initial={
                 reduced
                   ? { opacity: 0 }
-                  : mobileMotion
-                    ? { opacity: 0, y: 10, scale: 0.985 }
-                    : {
-                        opacity: 0,
-                        y: 8,
-                        scale: 0.992,
-                        filter: "blur(2px)",
-                      }
+                  : showcaseMotion
+                    ? { opacity: 0, scale: 0.995 }
+                    : legacyMobileMotion
+                      ? { opacity: 0, y: 10, scale: 0.985 }
+                      : {
+                          opacity: 0,
+                          y: 8,
+                          scale: 0.992,
+                          filter: "blur(2px)",
+                        }
               }
               animate={
                 reduced
-                  ? { opacity: 1 }
-                  : mobileMotion
-                    ? { opacity: 1, y: 0, scale: 1 }
-                    : {
+                  ? { opacity: 1, transition: { duration: 0.2 } }
+                  : showcaseMotion
+                    ? {
                         opacity: 1,
-                        y: 0,
                         scale: 1,
-                        filter: "blur(0px)",
+                        transition: {
+                          opacity: { duration: 0.48, ease: appleEase },
+                          scale: { duration: 0.48, ease: appleEase },
+                        },
                       }
+                    : legacyMobileMotion
+                      ? { opacity: 1, y: 0, scale: 1 }
+                      : {
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          filter: "blur(0px)",
+                        }
               }
               exit={
                 reduced
-                  ? { opacity: 0 }
-                  : mobileMotion
-                    ? { opacity: 0, y: -8, scale: 0.985 }
-                    : {
+                  ? { opacity: 0, transition: { duration: 0.15 } }
+                  : showcaseMotion
+                    ? {
                         opacity: 0,
-                        y: -5,
-                        scale: 0.992,
-                        filter: "blur(2px)",
+                        scale: 0.995,
+                        transition: {
+                          opacity: { duration: 0.26, ease: appleEase },
+                          scale: { duration: 0.26, ease: appleEase },
+                        },
                       }
+                    : legacyMobileMotion
+                      ? { opacity: 0, y: -8, scale: 0.985 }
+                      : {
+                          opacity: 0,
+                          y: -5,
+                          scale: 0.992,
+                          filter: "blur(2px)",
+                        }
               }
               transition={
                 reduced
                   ? { duration: 0.2, ease: "easeOut" }
-                  : mobileMotion
-                    ? {
-                        opacity: { duration: 0.5, ease: "easeInOut" },
-                        y: { duration: 0.5, ease: "easeInOut" },
-                        scale: { duration: 0.5, ease: "easeInOut" },
-                      }
-                    : {
-                        opacity: { duration: 0.55, ease: appleEase },
-                        y: { duration: 0.58, ease: appleEase },
-                        scale: { duration: 0.58, ease: appleEase },
-                        filter: { duration: 0.45, ease: appleEase },
-                      }
+                  : showcaseMotion
+                    ? undefined
+                    : legacyMobileMotion
+                      ? {
+                          opacity: { duration: 0.5, ease: "easeInOut" },
+                          y: { duration: 0.5, ease: "easeInOut" },
+                          scale: { duration: 0.5, ease: "easeInOut" },
+                        }
+                      : {
+                          opacity: { duration: 0.55, ease: appleEase },
+                          y: { duration: 0.58, ease: appleEase },
+                          scale: { duration: 0.58, ease: appleEase },
+                          filter: { duration: 0.45, ease: appleEase },
+                        }
               }
             >
               <ScreenContent

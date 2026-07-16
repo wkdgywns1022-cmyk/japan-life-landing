@@ -1,8 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import type { PhoneScreenId } from "../hero/i18n";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale } from "../hero/LocaleProvider";
 import type { ProductFeature } from "./features";
 import { COMPACT_MQ } from "./features";
@@ -10,25 +15,53 @@ import ProgressDots from "./ProgressDots";
 import StoryPhone from "./StoryPhone";
 import styles from "./MobileProductShowcase.module.css";
 
+type NavigationSource = "swipe" | "dot" | "initial" | "locale";
+
 type Props = {
   features: ProductFeature[];
 };
 
+const appleEase = [0.22, 1, 0.36, 1] as const;
+const SWIPE_THRESHOLD_PX = 48;
+const TRANSITION_MS = 560;
+const DEMO_START_DELAY_MS = 520;
+
 /**
- * Mobile / compact layout (<900px): horizontal swipe product showcase.
- * Hidden on desktop via CSS. Interactions gated with matchMedia (not UA).
+ * Mobile showcase (<900px): fit-to-viewport composition + pointer swipe + direct dots.
  */
 export default function MobileProductShowcase({ features }: Props) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const reduceMotion = useReducedMotion();
-  const trackRef = useRef<HTMLDivElement>(null);
   const [enabled, setEnabled] = useState(false);
-  const [index, setIndex] = useState(0);
-  const indexRef = useRef(0);
-  const [displayScreen, setDisplayScreen] = useState<PhoneScreenId>(
-    features[0]?.screen ?? "home",
-  );
-  const [textKey, setTextKey] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [navigationSource, setNavigationSource] =
+    useState<NavigationSource>("initial");
+  const [transitioning, setTransitioning] = useState(false);
+  const [demoReady, setDemoReady] = useState(true);
+  const [dragX, setDragX] = useState(0);
+  const [showHint, setShowHint] = useState(true);
+
+  const activeIndexRef = useRef(0);
+  const transitionIdRef = useRef(0);
+  const timersRef = useRef<number[]>([]);
+  const pointerRef = useRef<{
+    id: number | null;
+    startX: number;
+    startY: number;
+    tracking: boolean;
+    horizontal: boolean | null;
+  }>({ id: null, startX: 0, startY: 0, tracking: false, horizontal: null });
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    timersRef.current = [];
+  }, []);
+
+  const schedule = useCallback((fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    timersRef.current.push(id);
+    return id;
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(COMPACT_MQ);
@@ -38,118 +71,136 @@ export default function MobileProductShowcase({ features }: Props) {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const setIndexStable = useCallback((next: number) => {
-    if (next === indexRef.current) return;
-    indexRef.current = next;
-    setIndex(next);
-    setTextKey((k) => k + 1);
-  }, []);
-
   useEffect(() => {
-    if (!enabled) return;
-    const target = features[index]?.screen ?? "home";
-    if (target === displayScreen) return;
-    const id = window.setTimeout(
-      () => setDisplayScreen(target),
-      reduceMotion ? 0 : 40,
-    );
-    return () => window.clearTimeout(id);
-  }, [index, features, displayScreen, reduceMotion, enabled]);
+    return () => clearTimers();
+  }, [clearTimers]);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const track = trackRef.current;
-    if (!track) return;
+  const goToFeature = useCallback(
+    (targetIndex: number, source: NavigationSource) => {
+      if (!enabled) return;
+      const clamped = Math.max(0, Math.min(features.length - 1, targetIndex));
+      if (clamped === activeIndexRef.current && source !== "locale") return;
 
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const w = track.clientWidth || 1;
-        const next = Math.round(track.scrollLeft / w);
-        const clamped = Math.max(0, Math.min(features.length - 1, next));
-        setIndexStable(clamped);
-      });
-    };
+      transitionIdRef.current += 1;
+      const transitionId = transitionIdRef.current;
+      clearTimers();
+      setDragX(0);
+      setDemoReady(false);
+      setNavigationSource(source);
+      setTransitioning(true);
 
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [features.length, setIndexStable, enabled]);
+      if (source === "swipe") setShowHint(false);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const track = trackRef.current;
-    if (!track) return;
+      activeIndexRef.current = clamped;
+      setActiveIndex(clamped);
 
-    let dragging = false;
-    let startX = 0;
-    let startScroll = 0;
-    let moved = false;
+      const settleMs = reduceMotion ? 0 : TRANSITION_MS;
+      schedule(() => {
+        if (transitionId !== transitionIdRef.current) return;
+        setTransitioning(false);
+        schedule(() => {
+          if (transitionId !== transitionIdRef.current) return;
+          setDemoReady(true);
+        }, reduceMotion ? 0 : Math.max(0, DEMO_START_DELAY_MS - settleMs));
+      }, settleMs);
+    },
+    [enabled, features.length, clearTimers, schedule, reduceMotion],
+  );
 
-    const onDown = (e: PointerEvent) => {
-      if (e.pointerType === "touch") return;
-      dragging = true;
-      moved = false;
-      startX = e.clientX;
-      startScroll = track.scrollLeft;
-      track.setPointerCapture(e.pointerId);
-    };
-
-    const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 3) moved = true;
-      track.scrollLeft = startScroll - dx;
-    };
-
-    const onUp = (e: PointerEvent) => {
-      if (!dragging) return;
-      dragging = false;
-      if (moved) {
-        const w = track.clientWidth || 1;
-        const nearest = Math.round(track.scrollLeft / w);
-        const clamped = Math.max(0, Math.min(features.length - 1, nearest));
-        track.scrollTo({
-          left: clamped * w,
-          behavior: reduceMotion ? "auto" : "smooth",
-        });
-        setIndexStable(clamped);
-      }
-      try {
-        track.releasePointerCapture(e.pointerId);
-      } catch {
-        /* already released */
-      }
-    };
-
-    track.addEventListener("pointerdown", onDown);
-    track.addEventListener("pointermove", onMove);
-    track.addEventListener("pointerup", onUp);
-    track.addEventListener("pointercancel", onUp);
-    return () => {
-      track.removeEventListener("pointerdown", onDown);
-      track.removeEventListener("pointermove", onMove);
-      track.removeEventListener("pointerup", onUp);
-      track.removeEventListener("pointercancel", onUp);
-    };
-  }, [features.length, reduceMotion, setIndexStable, enabled]);
-
-  const goTo = useCallback(
+  const onDotSelect = useCallback(
     (id: string) => {
       const i = features.findIndex((f) => f.id === id);
       if (i < 0) return;
-      const track = trackRef.current;
-      if (!track) return;
-      track.scrollTo({
-        left: i * track.clientWidth,
-        behavior: reduceMotion ? "auto" : "smooth",
-      });
-      setIndexStable(i);
+      if (transitioning && i === activeIndexRef.current) return;
+      goToFeature(i, "dot");
     },
-    [features, reduceMotion, setIndexStable],
+    [features, goToFeature, transitioning],
+  );
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!enabled || e.button === 2) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest("button, a, input, textarea")) return;
+
+    pointerRef.current = {
+      id: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      tracking: true,
+      horizontal: null,
+    };
+    setDragX(0);
+  };
+
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const p = pointerRef.current;
+    if (!p.tracking || p.id !== e.pointerId) return;
+
+    const dx = e.clientX - p.startX;
+    const dy = e.clientY - p.startY;
+
+    if (p.horizontal === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      p.horizontal = Math.abs(dx) > Math.abs(dy) * 1.15;
+      if (!p.horizontal) {
+        p.tracking = false;
+        setDragX(0);
+        return;
+      }
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (!p.horizontal) return;
+    e.preventDefault();
+    const capped = Math.max(-6, Math.min(6, dx * 0.08));
+    setDragX(capped);
+  };
+
+  const finishPointer = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const p = pointerRef.current;
+    if (!p.tracking || p.id !== e.pointerId) {
+      pointerRef.current.tracking = false;
+      setDragX(0);
+      return;
+    }
+
+    const dx = e.clientX - p.startX;
+    const wasHorizontal = p.horizontal === true;
+    pointerRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      tracking: false,
+      horizontal: null,
+    };
+    setDragX(0);
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+
+    if (!wasHorizontal || !enabled) return;
+
+    if (dx <= -SWIPE_THRESHOLD_PX) {
+      goToFeature(activeIndexRef.current + 1, "swipe");
+    } else if (dx >= SWIPE_THRESHOLD_PX) {
+      goToFeature(activeIndexRef.current - 1, "swipe");
+    }
+  };
+
+  const feature = features[activeIndex] ?? features[0];
+  const text = t.sections[feature.sectionKey];
+  const marker = String(activeIndex + 1).padStart(2, "0");
+  const lines = text.heading.split("\n");
+  // Compact body: keep paragraph breaks, collapse soft newlines to spaces
+  const bodyBlocks = text.body.split("\n\n").map((block) =>
+    block.split("\n").join(" "),
   );
 
   const progressItems = features.map((f) => ({
@@ -157,8 +208,8 @@ export default function MobileProductShowcase({ features }: Props) {
     label: t.progress[f.progressKey],
   }));
 
-  const active = features[index] ?? features[0];
-  const demoActive = Boolean(active) && displayScreen === active.screen;
+  const demoActive = enabled && demoReady && !transitioning && !reduceMotion;
+  const reduced = Boolean(reduceMotion);
 
   return (
     <section
@@ -166,100 +217,94 @@ export default function MobileProductShowcase({ features }: Props) {
       className={styles.showcase}
       aria-label="Product showcase"
       data-layout="mobile"
+      data-nav={navigationSource}
     >
-      <div className={styles.stage}>
-        <div className={styles.phone}>
-          <StoryPhone
-            screen={displayScreen}
-            demoActive={demoActive}
-            size="story"
-          />
-        </div>
-        <ProgressDots
-          items={progressItems}
-          activeId={active?.id ?? features[0].id}
-          onSelect={goTo}
-          orientation="horizontal"
-        />
-      </div>
-
       <div
-        ref={trackRef}
-        className={styles.track}
-        tabIndex={0}
-        aria-roledescription="carousel"
+        className={styles.inner}
+        style={{ touchAction: "pan-y" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finishPointer}
+        onPointerCancel={finishPointer}
       >
-        {features.map((feature, i) => {
-          const text = t.sections[feature.sectionKey];
-          const marker = String(i + 1).padStart(2, "0");
-          const lines = text.heading.split("\n");
-          const bodyBlocks = text.body.split("\n\n");
-          const isActive = i === index;
-
-          return (
-            <article
-              key={feature.id}
-              id={`showcase-${feature.id}`}
-              className={styles.slide}
-              aria-current={isActive ? "true" : undefined}
+        <div className={styles.featureText}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={`${feature.id}-${locale}`}
+              className={styles.textBlock}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10 }}
+              animate={
+                reduced
+                  ? { opacity: 1, transition: { duration: 0.15 } }
+                  : {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        duration: 0.46,
+                        ease: appleEase,
+                        delay: 0.1,
+                      },
+                    }
+              }
+              exit={
+                reduced
+                  ? { opacity: 0, transition: { duration: 0.12 } }
+                  : {
+                      opacity: 0,
+                      y: -6,
+                      transition: { duration: 0.2, ease: appleEase },
+                    }
+              }
             >
-              {isActive && !reduceMotion ? (
-                <motion.div
-                  key={`text-${feature.id}-${textKey}`}
-                  className={styles.slideInner}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                >
-                  <p className={styles.marker}>{marker}</p>
-                  <h2 className={styles.heading}>
-                    {lines.map((line) => (
-                      <span key={line} className={styles.line}>
-                        {line}
-                      </span>
-                    ))}
-                  </h2>
-                  <div className={styles.body}>
-                    {bodyBlocks.map((block) => (
-                      <p key={block} className={styles.paragraph}>
-                        {block.split("\n").map((line) => (
-                          <span key={line} className={styles.line}>
-                            {line}
-                          </span>
-                        ))}
-                      </p>
-                    ))}
-                  </div>
-                </motion.div>
-              ) : (
-                <div
-                  className={styles.slideInner}
-                  style={{ opacity: isActive ? 1 : 0.35 }}
-                >
-                  <p className={styles.marker}>{marker}</p>
-                  <h2 className={styles.heading}>
-                    {lines.map((line) => (
-                      <span key={line} className={styles.line}>
-                        {line}
-                      </span>
-                    ))}
-                  </h2>
-                  <div className={styles.body}>
-                    {bodyBlocks.map((block) => (
-                      <p key={block} className={styles.paragraph}>
-                        {block.split("\n").map((line) => (
-                          <span key={line} className={styles.line}>
-                            {line}
-                          </span>
-                        ))}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </article>
-          );
-        })}
+              <p className={styles.marker}>{marker}</p>
+              <h2 className={styles.heading}>
+                {lines.map((line) => (
+                  <span key={line} className={styles.line}>
+                    {line}
+                  </span>
+                ))}
+              </h2>
+              <div className={styles.body}>
+                {bodyBlocks.map((block) => (
+                  <p key={block} className={styles.paragraph}>
+                    {block}
+                  </p>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className={styles.phoneArea}>
+          <div
+            className={styles.phoneFrame}
+            style={dragX ? { transform: `translateX(${dragX}px)` } : undefined}
+          >
+            <StoryPhone
+              screen={feature.screen}
+              demoActive={demoActive}
+              size="showcase"
+              motionPreset="mobileShowcase"
+            />
+          </div>
+        </div>
+
+        <div className={styles.controls}>
+          <ProgressDots
+            items={progressItems}
+            activeId={feature.id}
+            onSelect={onDotSelect}
+            orientation="horizontal"
+            enlargeActive
+            compact
+            disableActiveWhileTransitioning={transitioning}
+          />
+          {showHint ? (
+            <p className={styles.swipeHint}>{t.showcase.swipeHint}</p>
+          ) : (
+            <p className={styles.swipeHintSpacer} aria-hidden="true" />
+          )}
+        </div>
       </div>
     </section>
   );

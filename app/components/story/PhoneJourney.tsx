@@ -62,9 +62,8 @@ const HERO_SCREENS: PhoneScreenId[] = [
 
 /**
  * Single-page journey: shared hero + CTA, with layout-width product stories.
- * Desktop (≥900px): DesktopProductStory sticky scroll
- * Mobile (<900px): MobileProductShowcase horizontal swipe
- * One URL — no separate mobile site, routes, or UA redirects.
+ * Desktop (≥900px): Hero two-column + DesktopProductStory below
+ * Mobile (<900px): Hero stack + MobileProductShowcase
  */
 export default function PhoneJourney() {
   const { locale, t } = useLocale();
@@ -96,7 +95,6 @@ export default function PhoneJourney() {
     setActiveStage(next);
   }, []);
 
-  // Compact: only track hero visibility for rotation (showcase owns product state)
   useEffect(() => {
     if (!isCompact || !heroNode) return;
 
@@ -155,23 +153,9 @@ export default function PhoneJourney() {
   }, [activeStage, displayScreen, reduceMotion, clearRotate, isCompact]);
 
   useEffect(() => {
-    if (reduceMotion) {
+    if (reduceMotion || isCompact) {
       journeyRef.current?.style.setProperty("--hero-parallax", "0");
       return;
-    }
-
-    const mq = window.matchMedia(COMPACT_MQ);
-    const disableParallax = () => {
-      journeyRef.current?.style.setProperty("--hero-parallax", "0");
-    };
-
-    if (mq.matches) {
-      disableParallax();
-      const onChange = () => {
-        if (mq.matches) disableParallax();
-      };
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
     }
 
     let raf = 0;
@@ -191,16 +175,11 @@ export default function PhoneJourney() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    const onMq = () => {
-      if (mq.matches) disableParallax();
-    };
-    mq.addEventListener("change", onMq);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      mq.removeEventListener("change", onMq);
       cancelAnimationFrame(raf);
     };
-  }, [reduceMotion, locale, heroNode]);
+  }, [reduceMotion, locale, heroNode, isCompact]);
 
   const targetScreen = screenForStage(activeStage);
   const demoActive =
@@ -241,11 +220,65 @@ export default function PhoneJourney() {
   const handleExploreClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!window.matchMedia(COMPACT_MQ).matches) return;
     event.preventDefault();
-    document.getElementById("product-showcase")?.scrollIntoView({
+    const target = document.getElementById("product-showcase");
+    if (!target) return;
+
+    target.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
       block: "start",
     });
+
+    const settleMs = reduceMotion ? 0 : 420;
+    window.setTimeout(() => {
+      const delta = target.getBoundingClientRect().top;
+      if (Math.abs(delta) > 2) {
+        window.scrollBy({ top: delta, left: 0, behavior: "auto" });
+      }
+    }, settleMs);
   };
+
+  const heroCopy = (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={locale}
+        ref={heroCopyRef}
+        className={styles.heroCopy}
+        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduceMotion ? undefined : { opacity: 0 }}
+        transition={{ duration: 0.55, ease: appleEase }}
+      >
+        <p className={styles.label}>{hero.brand}</p>
+        <h1 className={styles.headline}>
+          {hero.headlineLine1}
+          <br />
+          {hero.headlineLine2}
+        </h1>
+        <p className={styles.subtitle}>
+          {hero.subtitleLine1}
+          <br />
+          {hero.subtitleLine2}
+        </p>
+        <p className={styles.support}>{hero.support}</p>
+        <div className={styles.actions}>
+          <a className={styles.btnPrimary} href="#beta">
+            {hero.ctaBeta}
+          </a>
+          <a
+            className={styles.btnSecondary}
+            href={EXPLORE_HREF_DESKTOP}
+            data-mobile-href={EXPLORE_HREF_MOBILE}
+            onClick={handleExploreClick}
+          >
+            <span className={styles.btnSecondaryText}>{hero.ctaExplore}</span>
+            <span className={styles.btnArrow}>
+              <IconArrowRight size={16} />
+            </span>
+          </a>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
 
   return (
     <div
@@ -272,84 +305,63 @@ export default function PhoneJourney() {
         heroNode={heroNode}
         displayScreen={displayScreen}
         demoActive={demoActive}
-        floating={activeStage === HERO_ID}
+        floating={false}
         onPhoneEnter={handlePhoneEnter}
         onPhoneLeave={handlePhoneLeave}
       >
-        <div className={styles.grid}>
-          <div className={styles.copyColumn}>
-            <section
-              id={HERO_ID}
-              ref={setHeroNode}
-              className={styles.heroStage}
-              aria-label="Hero"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={locale}
-                  ref={heroCopyRef}
-                  className={styles.heroCopy}
-                  initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? undefined : { opacity: 0 }}
-                  transition={{ duration: 0.55, ease: appleEase }}
-                >
-                  <p className={styles.label}>{hero.brand}</p>
-                  <h1 className={styles.headline}>
-                    {hero.headlineLine1}
-                    <br />
-                    {hero.headlineLine2}
-                  </h1>
-                  <p className={styles.subtitle}>
-                    {hero.subtitleLine1}
-                    <br />
-                    {hero.subtitleLine2}
-                  </p>
-                  <p className={styles.support}>{hero.support}</p>
-                  <div className={styles.actions}>
-                    <a className={styles.btnPrimary} href="#beta">
-                      {hero.ctaBeta}
-                    </a>
-                    <a
-                      className={styles.btnSecondary}
-                      href={EXPLORE_HREF_DESKTOP}
-                      data-mobile-href={EXPLORE_HREF_MOBILE}
-                      onClick={handleExploreClick}
-                    >
-                      <span className={styles.btnSecondaryText}>
-                        {hero.ctaExplore}
-                      </span>
-                      <span className={styles.btnArrow}>
-                        <IconArrowRight size={16} />
-                      </span>
-                    </a>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+        {/* —— Hero: ends cleanly before product story —— */}
+        <section
+          id={HERO_ID}
+          ref={setHeroNode}
+          className={styles.heroStage}
+          aria-label="Hero"
+        >
+          <div className={styles.heroInner}>
+            <div className={styles.heroTextColumn}>{heroCopy}</div>
 
-              <div className={styles.mobileHeroPhone}>
-                <div
-                  onMouseEnter={handlePhoneEnter}
-                  onMouseLeave={handlePhoneLeave}
-                >
-                  <StoryPhone
-                    screen={displayScreen}
-                    demoActive={false}
-                    floating={false}
-                    size="hero"
-                  />
-                </div>
+            <div className={styles.heroPhoneColumn}>
+              <div
+                className={styles.heroPhone}
+                onMouseEnter={handlePhoneEnter}
+                onMouseLeave={handlePhoneLeave}
+              >
+                <StoryPhone
+                  screen={displayScreen}
+                  demoActive={false}
+                  floating={activeStage === HERO_ID && !isCompact}
+                  size="hero"
+                />
               </div>
-            </section>
-
-            <div className={styles.blend} aria-hidden="true" />
-
-            <DesktopProductStory.Steps />
-            <MobileProductShowcase features={PRODUCT_FEATURES} />
+            </div>
           </div>
 
+          <div className={styles.mobileHeroPhone}>
+            <div
+              onMouseEnter={handlePhoneEnter}
+              onMouseLeave={handlePhoneLeave}
+            >
+              <StoryPhone
+                screen={displayScreen}
+                demoActive={false}
+                floating={false}
+                size="hero"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className={styles.blend} aria-hidden="true" />
+
+        {/* —— Desktop product story (steps + sticky phone + dots) —— */}
+        <div className={styles.storyGrid}>
+          <div className={styles.storyCopy}>
+            <DesktopProductStory.Steps />
+          </div>
           <DesktopProductStory.Phone />
         </div>
+
+        {/* —— Mobile showcase only (hidden ≥900px) —— */}
+        <MobileProductShowcase features={PRODUCT_FEATURES} />
       </DesktopProductStory>
 
       <div

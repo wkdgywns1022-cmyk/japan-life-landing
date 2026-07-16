@@ -5,7 +5,7 @@ import styles from "./DeviceShell.module.css";
 
 type DeviceShellProps = {
   children: ReactNode;
-  size?: "hero" | "feature" | "story";
+  size?: "hero" | "feature" | "story" | "showcase";
   floating?: boolean;
   showHomeIndicator?: boolean;
   onMouseEnter?: () => void;
@@ -23,7 +23,13 @@ export default function DeviceShell({
   className,
 }: DeviceShellProps) {
   const sizeClass =
-    size === "hero" ? styles.hero : size === "story" ? styles.story : styles.feature;
+    size === "hero"
+      ? styles.hero
+      : size === "story"
+        ? styles.story
+        : size === "showcase"
+          ? styles.showcase
+          : styles.feature;
 
   return (
     <div

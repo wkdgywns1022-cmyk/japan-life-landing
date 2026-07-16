@@ -34,41 +34,30 @@
   padding: 0;
   overflow: visible;
   isolation: auto;
-  transform:
-    translateY(calc(var(--hero-parallax) * 18px))
-    scale(calc(1 + var(--hero-parallax) * 0.02));
+  transform: none;
   transform-origin: center center;
-  will-change: transform;
 }
 
 .clusterDots {
   position: absolute;
-  left: calc(100% + 32px);
+  left: calc(100% + 28px);
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
   background: transparent;
 }
 
-@media (max-width: 1100px) {
-  .clusterDots {
-    left: 50%;
-    top: calc(100% + 12px);
-    right: auto;
-    transform: translateX(-50%);
-  }
-}
-
+/* Keep vertical dots beside the phone for all desktop widths (≥900px).
+   Do NOT reflow under the phone until the mobile breakpoint. */
 @media (max-width: 899px) {
   .steps,
   .phoneColumn {
-    display: none;
+    display: none !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .phoneCluster {
     transform: none !important;
-    will-change: auto;
   }
 }
