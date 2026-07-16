@@ -4,6 +4,7 @@
   align-items: center;
   box-sizing: border-box;
   padding-block: 1.5rem;
+  scroll-margin-top: 1.5rem;
 }
 
 .inner {

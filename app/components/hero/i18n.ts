@@ -18,6 +18,8 @@ export type HeroCopy = {
   brand: string;
   headlineLine1: string;
   headlineLine2: string;
+  /** Optional third line — used for Japanese intentional 3-line layout */
+  headlineLine3?: string;
   subtitleLine1: string;
   subtitleLine2: string;
   support: string;
@@ -664,8 +666,9 @@ export const translations: Record<Locale, Translations> = {
   ja: {
     hero: {
       brand: "LifePass Japan",
-      headlineLine1: "日本での暮らしのすべてを、",
-      headlineLine2: "ひとつのアプリに",
+      headlineLine1: "日本での暮らしの",
+      headlineLine2: "すべてを",
+      headlineLine3: "ひとつのアプリに",
       subtitleLine1: "日本での新しいスタートを、もっと簡単に",
       subtitleLine2: "行政手続きから生活情報、家計管理まで",
       support: "必要な機能を LifePass Japan ひとつにまとめました",

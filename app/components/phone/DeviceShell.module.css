@@ -243,14 +243,13 @@
   pointer-events: none;
 }
 
-/* Desktop-only large phones */
+/* Desktop-only large phones — match shared --desktop-story-phone-width */
 @media (min-width: 900px) {
   .hero,
   .story {
     --phone-scale: min(
-      0.915,
-      calc((100svh - 140px) / 852px),
-      calc(390px / 393px)
+      calc(var(--desktop-story-phone-width) / 393px),
+      calc((100svh - 140px) / 852px)
     );
   }
 

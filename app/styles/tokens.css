@@ -56,4 +56,9 @@
     0 36px 70px -18px rgba(130, 140, 160, 0.38),
     0 18px 36px -14px rgba(150, 158, 172, 0.28),
     0 8px 16px -8px rgba(160, 168, 180, 0.2);
+
+  /* Shared desktop Hero + Product Story phone track */
+  --desktop-story-phone-width: clamp(330px, 27vw, 390px);
+  --desktop-page-width: min(1180px, calc(100% - 4rem));
+  --desktop-hero-gap: clamp(56px, 7vw, 112px);
 }

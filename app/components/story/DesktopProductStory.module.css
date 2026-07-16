@@ -25,7 +25,7 @@
 .phoneCluster {
   position: relative;
   display: block;
-  width: clamp(320px, 28vw, 390px);
+  width: var(--desktop-story-phone-width);
   max-height: calc(100svh - 140px);
   margin-inline: auto;
   background: transparent;

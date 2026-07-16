@@ -277,9 +277,11 @@ export default function PhoneJourney() {
   };
 
   const handleExploreClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (!window.matchMedia(COMPACT_MQ).matches) return;
     event.preventDefault();
-    const target = document.getElementById("product-showcase");
+    const targetId = window.matchMedia(COMPACT_MQ).matches
+      ? "product-showcase"
+      : "product-intro";
+    const target = document.getElementById(targetId);
     if (!target) return;
 
     target.scrollIntoView({
@@ -308,10 +310,16 @@ export default function PhoneJourney() {
         transition={{ duration: 0.55, ease: appleEase }}
       >
         <p className={styles.label}>{hero.brand}</p>
-        <h1 className={styles.headline}>
+        <h1 className={styles.headline} data-locale={locale}>
           {hero.headlineLine1}
           <br />
           {hero.headlineLine2}
+          {hero.headlineLine3 ? (
+            <>
+              <br />
+              {hero.headlineLine3}
+            </>
+          ) : null}
         </h1>
         <p className={styles.subtitle}>
           {hero.subtitleLine1}
@@ -369,15 +377,17 @@ export default function PhoneJourney() {
         ) : null}
       </div>
 
-      {/* Mobile hero phone — mounted only on mobile */}
+      {/* Mobile hero phone — full-width area, flex-centered phone */}
       {isMobile ? (
-        <div className={styles.mobileHeroPhone}>
-          <StoryPhone
-            screen={displayScreen}
-            demoActive={false}
-            floating={false}
-            size="hero"
-          />
+        <div className={styles.mobileHeroPhoneArea}>
+          <div className={styles.mobileHeroPhone}>
+            <StoryPhone
+              screen={displayScreen}
+              demoActive={false}
+              floating={false}
+              size="hero"
+            />
+          </div>
         </div>
       ) : null}
     </section>
@@ -388,6 +398,7 @@ export default function PhoneJourney() {
       ref={journeyRef}
       className={`${styles.journey} ${fontClass}`}
       data-layout={layoutMode ?? "pending"}
+      data-locale={locale}
     >
       <div className={styles.storyBg} aria-hidden="true" />
       <div className={styles.heroWash} aria-hidden="true" />
