@@ -1,4 +1,4 @@
-import { CellularSignalIcon, WifiIcon } from "./StatusIcons";
+import { BatteryIcon, CellularSignalIcon, WifiIcon } from "./StatusIcons";
 import styles from "./StatusBar.module.css";
 
 export default function StatusBar({ time = "9:41" }: { time?: string }) {
@@ -8,7 +8,7 @@ export default function StatusBar({ time = "9:41" }: { time?: string }) {
       <div className={styles.statusIcons}>
         <CellularSignalIcon className={styles.iconSvg} />
         <WifiIcon className={styles.iconSvg} />
-        <span className={styles.battery} aria-hidden="true" />
+        <BatteryIcon className={styles.iconSvg} />
       </div>
     </div>
   );

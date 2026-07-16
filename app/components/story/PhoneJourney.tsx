@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { Noto_Sans, Noto_Sans_JP, Noto_Sans_KR } from "next/font/google";
 import {
   AnimatePresence,
@@ -11,9 +17,19 @@ import type { PhoneScreenId } from "../hero/i18n";
 import { useLocale } from "../hero/LocaleProvider";
 import LanguageSelector from "../hero/LanguageSelector";
 import { IconArrowRight } from "../hero/icons";
-import FeatureStep from "./FeatureStep";
-import ProgressDots from "./ProgressDots";
+import DesktopProductStory from "./DesktopProductStory";
+import MobileProductShowcase from "./MobileProductShowcase";
 import StoryPhone from "./StoryPhone";
+import {
+  COMPACT_MQ,
+  EXPLORE_HREF_DESKTOP,
+  EXPLORE_HREF_MOBILE,
+  HERO_ID,
+  PRODUCT_FEATURES,
+  screenForStage,
+  type StageId,
+} from "./features";
+import { useIsCompactLayout } from "./useLayoutBreakpoint";
 import styles from "./PhoneJourney.module.css";
 
 const notoSans = Noto_Sans({
@@ -35,10 +51,8 @@ const notoSansJp = Noto_Sans_JP({
 });
 
 const appleEase = [0.22, 1, 0.36, 1] as const;
-const HERO_ID = "hero-stage";
 const PHONE_DELAY_MS = 280;
 const HERO_ROTATE_MS = 2200;
-const COMPACT_MQ = "(max-width: 899px)";
 const HERO_SCREENS: PhoneScreenId[] = [
   "home",
   "checklist",
@@ -46,90 +60,28 @@ const HERO_SCREENS: PhoneScreenId[] = [
   "expense",
 ];
 
-type FeatureId =
-  | "product-intro"
-  | "feature-checklist"
-  | "feature-garbage"
-  | "feature-japanese"
-  | "feature-expense"
-  | "feature-shortcuts";
-
-type StageId = typeof HERO_ID | FeatureId;
-
-const FEATURES: {
-  id: FeatureId;
-  screen: PhoneScreenId;
-  sectionKey: "intro" | "checklist" | "garbage" | "japanese" | "expense" | "shortcuts";
-  progressKey: "intro" | "checklist" | "garbage" | "japanese" | "expense" | "shortcuts";
-}[] = [
-  {
-    id: "product-intro",
-    screen: "home",
-    sectionKey: "intro",
-    progressKey: "intro",
-  },
-  {
-    id: "feature-checklist",
-    screen: "checklist",
-    sectionKey: "checklist",
-    progressKey: "checklist",
-  },
-  {
-    id: "feature-garbage",
-    screen: "garbage",
-    sectionKey: "garbage",
-    progressKey: "garbage",
-  },
-  {
-    id: "feature-japanese",
-    screen: "wardOfficeJapanese",
-    sectionKey: "japanese",
-    progressKey: "japanese",
-  },
-  {
-    id: "feature-expense",
-    screen: "expense",
-    sectionKey: "expense",
-    progressKey: "expense",
-  },
-  {
-    id: "feature-shortcuts",
-    screen: "lifeShortcuts",
-    sectionKey: "shortcuts",
-    progressKey: "shortcuts",
-  },
-];
-
-function screenForStage(stage: StageId): PhoneScreenId {
-  if (stage === HERO_ID) return "home";
-  return FEATURES.find((f) => f.id === stage)?.screen ?? "home";
-}
-
+/**
+ * Single-page journey: shared hero + CTA, with layout-width product stories.
+ * Desktop (≥900px): DesktopProductStory sticky scroll
+ * Mobile (<900px): MobileProductShowcase horizontal swipe
+ * One URL — no separate mobile site, routes, or UA redirects.
+ */
 export default function PhoneJourney() {
   const { locale, t } = useLocale();
   const reduceMotion = useReducedMotion();
+  const isCompact = useIsCompactLayout();
   const hero = t.hero;
   const cta = t.finalCta;
 
   const [activeStage, setActiveStage] = useState<StageId>(HERO_ID);
   const [displayScreen, setDisplayScreen] = useState<PhoneScreenId>("home");
-  const [isCompact, setIsCompact] = useState(false);
+  const [heroNode, setHeroNode] = useState<HTMLElement | null>(null);
   const activeStageRef = useRef<StageId>(HERO_ID);
 
-  const nodesRef = useRef(new Map<StageId, HTMLElement>());
   const pausedRef = useRef(false);
   const rotateTimerRef = useRef<number | null>(null);
   const journeyRef = useRef<HTMLDivElement>(null);
-  const stickyPhoneRef = useRef<HTMLDivElement>(null);
   const heroCopyRef = useRef<HTMLDivElement>(null);
-
-  const setNodeRef = useCallback(
-    (id: StageId) => (node: HTMLElement | null) => {
-      if (node) nodesRef.current.set(id, node);
-      else nodesRef.current.delete(id);
-    },
-    [],
-  );
 
   const clearRotate = useCallback(() => {
     if (rotateTimerRef.current !== null) {
@@ -144,60 +96,28 @@ export default function PhoneJourney() {
     setActiveStage(next);
   }, []);
 
+  // Compact: only track hero visibility for rotation (showcase owns product state)
   useEffect(() => {
-    const mq = window.matchMedia(COMPACT_MQ);
-    const sync = () => setIsCompact(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
+    if (!isCompact || !heroNode) return;
 
-  useEffect(() => {
-    const stageIds: StageId[] = [HERO_ID, ...FEATURES.map((f) => f.id)];
-    const nodes = stageIds
-      .map((id) => nodesRef.current.get(id))
-      .filter((n): n is HTMLElement => Boolean(n));
-    if (nodes.length === 0) return;
-
-    const pickClosest = () => {
-      // Mobile: target ~60% down the viewport so text under sticky phone wins
-      const targetLine = window.innerHeight * (isCompact ? 0.6 : 0.42);
-      let bestId: StageId = activeStageRef.current;
-      let bestDist = Number.POSITIVE_INFINITY;
-
-      for (const id of stageIds) {
-        const node = nodesRef.current.get(id);
-        if (!node) continue;
-        const rect = node.getBoundingClientRect();
-        // Skip fully off-screen steps
-        if (rect.bottom < 40 || rect.top > window.innerHeight - 40) continue;
-        const center = rect.top + rect.height * 0.5;
-        const dist = Math.abs(center - targetLine);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestId = id;
-        }
-      }
-
-      setStageStable(bestId);
+    const syncHero = () => {
+      const rect = heroNode.getBoundingClientRect();
+      const inHero = rect.bottom > window.innerHeight * 0.28;
+      setStageStable(inHero ? HERO_ID : "product-intro");
     };
 
-    const observer = new IntersectionObserver(() => pickClosest(), {
+    const observer = new IntersectionObserver(syncHero, {
       root: null,
-      rootMargin: isCompact ? "-28% 0px -52% 0px" : "-35% 0px -45% 0px",
-      threshold: isCompact ? [0, 0.15, 0.3, 0.5] : [0.15, 0.3, 0.5],
+      threshold: [0, 0.15, 0.35, 0.55],
     });
-
-    nodes.forEach((node) => observer.observe(node));
-    pickClosest();
-    window.addEventListener("scroll", pickClosest, { passive: true });
-    window.addEventListener("resize", pickClosest, { passive: true });
+    observer.observe(heroNode);
+    syncHero();
+    window.addEventListener("scroll", syncHero, { passive: true });
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", pickClosest);
-      window.removeEventListener("resize", pickClosest);
+      window.removeEventListener("scroll", syncHero);
     };
-  }, [locale, setStageStable, isCompact]);
+  }, [isCompact, heroNode, setStageStable]);
 
   useEffect(() => {
     clearRotate();
@@ -224,10 +144,12 @@ export default function PhoneJourney() {
   useEffect(() => {
     if (activeStage === HERO_ID) return;
     clearRotate();
+    if (isCompact) return;
+
     const target = screenForStage(activeStage);
     if (target === displayScreen) return;
 
-    const delay = reduceMotion ? 0 : isCompact ? 700 : PHONE_DELAY_MS;
+    const delay = reduceMotion ? 0 : PHONE_DELAY_MS;
     const id = window.setTimeout(() => setDisplayScreen(target), delay);
     return () => window.clearTimeout(id);
   }, [activeStage, displayScreen, reduceMotion, clearRotate, isCompact]);
@@ -254,7 +176,6 @@ export default function PhoneJourney() {
 
     let raf = 0;
     const update = () => {
-      const heroNode = nodesRef.current.get(HERO_ID);
       if (!heroNode || !journeyRef.current) return;
       const rect = heroNode.getBoundingClientRect();
       const range = Math.max(rect.height * 0.55, 1);
@@ -279,7 +200,7 @@ export default function PhoneJourney() {
       mq.removeEventListener("change", onMq);
       cancelAnimationFrame(raf);
     };
-  }, [reduceMotion, locale]);
+  }, [reduceMotion, locale, heroNode]);
 
   const targetScreen = screenForStage(activeStage);
   const demoActive =
@@ -288,7 +209,7 @@ export default function PhoneJourney() {
   const activeFeatureIndex =
     activeStage === HERO_ID
       ? -1
-      : FEATURES.findIndex((f) => f.id === activeStage);
+      : PRODUCT_FEATURES.findIndex((f) => f.id === activeStage);
 
   const fontClass =
     locale === "ja"
@@ -317,26 +238,14 @@ export default function PhoneJourney() {
     }, HERO_ROTATE_MS);
   };
 
-  const scrollToFeature = (id: string) => {
-    const node = nodesRef.current.get(id as StageId);
-    if (!node) return;
-    node.scrollIntoView({
+  const handleExploreClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!window.matchMedia(COMPACT_MQ).matches) return;
+    event.preventDefault();
+    document.getElementById("product-showcase")?.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
-      block: isCompact ? "center" : "center",
+      block: "start",
     });
-    setStageStable(id as StageId);
   };
-
-  const progressItems = FEATURES.map((f) => ({
-    id: f.id,
-    label: t.progress[f.progressKey],
-  }));
-
-  const progressActiveId =
-    activeStage === HERO_ID ? FEATURES[0].id : activeStage;
-
-  const storyPhoneScreen =
-    activeStage === HERO_ID ? FEATURES[0].screen : displayScreen;
 
   return (
     <div
@@ -356,136 +265,99 @@ export default function PhoneJourney() {
         <LanguageSelector />
       </motion.header>
 
-      <div className={styles.grid}>
-        <div className={styles.copyColumn}>
-          <section
-            id={HERO_ID}
-            ref={setNodeRef(HERO_ID)}
-            className={styles.heroStage}
-            aria-label="Hero"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={locale}
-                ref={heroCopyRef}
-                className={styles.heroCopy}
-                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: 0.55, ease: appleEase }}
-              >
-                <p className={styles.label}>{hero.brand}</p>
-                <h1 className={styles.headline}>
-                  {hero.headlineLine1}
-                  <br />
-                  {hero.headlineLine2}
-                </h1>
-                <p className={styles.subtitle}>
-                  {hero.subtitleLine1}
-                  <br />
-                  {hero.subtitleLine2}
-                </p>
-                <p className={styles.support}>{hero.support}</p>
-                <div className={styles.actions}>
-                  <a className={styles.btnPrimary} href="#beta">
-                    {hero.ctaBeta}
-                  </a>
-                  <a className={styles.btnSecondary} href="#product-intro">
-                    <span className={styles.btnSecondaryText}>
-                      {hero.ctaExplore}
-                    </span>
-                    <span className={styles.btnArrow}>
-                      <IconArrowRight size={16} />
-                    </span>
-                  </a>
+      <DesktopProductStory
+        features={PRODUCT_FEATURES}
+        activeStage={activeStage}
+        onStageChange={setStageStable}
+        heroNode={heroNode}
+        displayScreen={displayScreen}
+        demoActive={demoActive}
+        floating={activeStage === HERO_ID}
+        onPhoneEnter={handlePhoneEnter}
+        onPhoneLeave={handlePhoneLeave}
+      >
+        <div className={styles.grid}>
+          <div className={styles.copyColumn}>
+            <section
+              id={HERO_ID}
+              ref={setHeroNode}
+              className={styles.heroStage}
+              aria-label="Hero"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={locale}
+                  ref={heroCopyRef}
+                  className={styles.heroCopy}
+                  initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduceMotion ? undefined : { opacity: 0 }}
+                  transition={{ duration: 0.55, ease: appleEase }}
+                >
+                  <p className={styles.label}>{hero.brand}</p>
+                  <h1 className={styles.headline}>
+                    {hero.headlineLine1}
+                    <br />
+                    {hero.headlineLine2}
+                  </h1>
+                  <p className={styles.subtitle}>
+                    {hero.subtitleLine1}
+                    <br />
+                    {hero.subtitleLine2}
+                  </p>
+                  <p className={styles.support}>{hero.support}</p>
+                  <div className={styles.actions}>
+                    <a className={styles.btnPrimary} href="#beta">
+                      {hero.ctaBeta}
+                    </a>
+                    <a
+                      className={styles.btnSecondary}
+                      href={EXPLORE_HREF_DESKTOP}
+                      data-mobile-href={EXPLORE_HREF_MOBILE}
+                      onClick={handleExploreClick}
+                    >
+                      <span className={styles.btnSecondaryText}>
+                        {hero.ctaExplore}
+                      </span>
+                      <span className={styles.btnArrow}>
+                        <IconArrowRight size={16} />
+                      </span>
+                    </a>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              <div className={styles.mobileHeroPhone}>
+                <div
+                  onMouseEnter={handlePhoneEnter}
+                  onMouseLeave={handlePhoneLeave}
+                >
+                  <StoryPhone
+                    screen={displayScreen}
+                    demoActive={false}
+                    floating={false}
+                    size="hero"
+                  />
                 </div>
-              </motion.div>
-            </AnimatePresence>
-
-            <div className={styles.mobileHeroPhone}>
-              <div
-                onMouseEnter={handlePhoneEnter}
-                onMouseLeave={handlePhoneLeave}
-              >
-                <StoryPhone
-                  screen={displayScreen}
-                  demoActive={false}
-                  floating={activeStage === HERO_ID && !isCompact}
-                  size="hero"
-                />
               </div>
-            </div>
-          </section>
+            </section>
 
-          <div className={styles.blend} aria-hidden="true" />
+            <div className={styles.blend} aria-hidden="true" />
 
-          <div className={styles.storySteps}>
-            {/* Mobile/tablet: sticky shared phone through all six features */}
-            <div className={styles.mobileStickyVisual}>
-              <StoryPhone
-                screen={storyPhoneScreen}
-                demoActive={demoActive}
-                pauseOnHover
-              />
-              <ProgressDots
-                items={progressItems}
-                activeId={progressActiveId}
-                onSelect={scrollToFeature}
-                orientation="horizontal"
-              />
-            </div>
-
-            {FEATURES.map((feature, index) => {
-              const copy = t.sections[feature.sectionKey];
-              return (
-                <FeatureStep
-                  key={feature.id}
-                  id={feature.id}
-                  index={index}
-                  screen={feature.screen}
-                  heading={copy.heading}
-                  body={copy.body}
-                  active={activeStage === feature.id}
-                  stepRef={setNodeRef(feature.id)}
-                />
-              );
-            })}
-
-            <div className={styles.mobileStoryEnd} aria-hidden="true" />
+            <DesktopProductStory.Steps />
+            <MobileProductShowcase features={PRODUCT_FEATURES} />
           </div>
-        </div>
 
-        <div className={styles.stickyPhoneColumn}>
-          <div
-            ref={stickyPhoneRef}
-            className={styles.stickyPhone}
-            onMouseEnter={handlePhoneEnter}
-            onMouseLeave={handlePhoneLeave}
-          >
-            <div className={styles.phoneCluster}>
-              <StoryPhone
-                screen={displayScreen}
-                demoActive={demoActive}
-                floating={activeStage === HERO_ID}
-                pauseOnHover
-              />
-              <div className={styles.clusterDots}>
-                <ProgressDots
-                  items={progressItems}
-                  activeId={progressActiveId}
-                  onSelect={scrollToFeature}
-                  orientation="vertical"
-                />
-              </div>
-            </div>
-          </div>
+          <DesktopProductStory.Phone />
         </div>
-      </div>
+      </DesktopProductStory>
 
       <div
         id="beta"
         className={styles.finalCta}
-        data-active={activeFeatureIndex === FEATURES.length - 1 ? "near" : ""}
+        data-active={
+          activeFeatureIndex === PRODUCT_FEATURES.length - 1 ? "near" : ""
+        }
       >
         <motion.div
           className={styles.finalInner}

@@ -126,7 +126,7 @@ export default function StoryPhone({
                 reduced
                   ? { opacity: 0 }
                   : mobileMotion
-                    ? { opacity: 0, y: 5, scale: 0.995 }
+                    ? { opacity: 0, y: 10, scale: 0.985 }
                     : {
                         opacity: 0,
                         y: 8,
@@ -150,7 +150,7 @@ export default function StoryPhone({
                 reduced
                   ? { opacity: 0 }
                   : mobileMotion
-                    ? { opacity: 0, y: -3, scale: 0.995 }
+                    ? { opacity: 0, y: -8, scale: 0.985 }
                     : {
                         opacity: 0,
                         y: -5,
@@ -163,9 +163,9 @@ export default function StoryPhone({
                   ? { duration: 0.2, ease: "easeOut" }
                   : mobileMotion
                     ? {
-                        opacity: { duration: 0.5, ease: appleEase },
-                        y: { duration: 0.5, ease: appleEase },
-                        scale: { duration: 0.5, ease: appleEase },
+                        opacity: { duration: 0.5, ease: "easeInOut" },
+                        y: { duration: 0.5, ease: "easeInOut" },
+                        scale: { duration: 0.5, ease: "easeInOut" },
                       }
                     : {
                         opacity: { duration: 0.55, ease: appleEase },

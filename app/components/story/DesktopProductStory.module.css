@@ -1,0 +1,74 @@
+/* Desktop sticky scroll story — hidden below 900px via CSS */
+
+.steps {
+  min-width: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.phoneColumn {
+  position: relative;
+  min-height: 100%;
+}
+
+.stickyPhone {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100svh - 140px);
+  background: transparent;
+  overflow: visible;
+}
+
+.phoneCluster {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+  isolation: auto;
+  transform:
+    translateY(calc(var(--hero-parallax) * 18px))
+    scale(calc(1 + var(--hero-parallax) * 0.02));
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.clusterDots {
+  position: absolute;
+  left: calc(100% + 32px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: transparent;
+}
+
+@media (max-width: 1100px) {
+  .clusterDots {
+    left: 50%;
+    top: calc(100% + 12px);
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 899px) {
+  .steps,
+  .phoneColumn {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phoneCluster {
+    transform: none !important;
+    will-change: auto;
+  }
+}

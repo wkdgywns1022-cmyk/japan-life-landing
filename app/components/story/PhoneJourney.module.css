@@ -198,70 +198,6 @@
   pointer-events: none;
 }
 
-.storySteps {
-  min-width: 0;
-  position: relative;
-  overflow: visible;
-}
-
-/* Mobile sticky phone — hidden on desktop */
-.mobileStickyVisual {
-  display: none;
-}
-
-.mobileStoryEnd {
-  display: none;
-}
-
-/* Shared in-flow phone legacy slot removed — sticky visual replaces it */
-.sharedStoryPhone {
-  display: none;
-}
-
-.stickyPhoneColumn {
-  position: relative;
-  min-height: 100%;
-}
-
-.stickyPhone {
-  position: sticky;
-  top: 96px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100svh - 140px);
-  background: transparent;
-  overflow: visible;
-}
-
-.phoneCluster {
-  position: relative;
-  display: block;
-  width: fit-content;
-  margin-inline: auto;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  box-shadow: none;
-  padding: 0;
-  overflow: visible;
-  isolation: auto;
-  transform:
-    translateY(calc(var(--hero-parallax) * 18px))
-    scale(calc(1 + var(--hero-parallax) * 0.02));
-  transform-origin: center center;
-  will-change: transform;
-}
-
-.clusterDots {
-  position: absolute;
-  left: calc(100% + 32px);
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  background: transparent;
-}
-
 .finalCta {
   position: relative;
   z-index: 1;
@@ -320,16 +256,7 @@
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.34);
 }
 
-@media (max-width: 1100px) {
-  .clusterDots {
-    left: 50%;
-    top: calc(100% + 12px);
-    right: auto;
-    transform: translateX(-50%);
-  }
-}
-
-/* —— Small tablet + mobile: compact sticky story —— */
+/* —— Small tablet + mobile: compact layout —— */
 @media (max-width: 899px) {
   .journey {
     overflow-x: clip;
@@ -367,10 +294,6 @@
     overflow: visible;
     transform: none;
     filter: none;
-  }
-
-  .stickyPhoneColumn {
-    display: none;
   }
 
   .heroWash {
@@ -477,55 +400,6 @@
 
   .blend {
     height: 32px;
-  }
-
-  .storySteps {
-    width: 100%;
-    padding-bottom: 0;
-    overflow: visible;
-  }
-
-  .mobileStickyVisual {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    position: sticky;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    z-index: 4;
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    padding: 10px 0 14px;
-    box-sizing: border-box;
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    overflow: visible;
-    transform: none;
-    filter: none;
-    perspective: none;
-    contain: none;
-    will-change: auto;
-    /* Soft page fade so scrolling text doesn't show through the phone */
-    background-image: linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #ffffff 70%,
-      rgba(255, 255, 255, 0.7) 86%,
-      transparent 100%
-    );
-  }
-
-  .mobileStoryEnd {
-    display: block;
-    height: 28svh;
-    width: 100%;
-    pointer-events: none;
-  }
-
-  .sharedStoryPhone {
-    display: none;
   }
 
   .finalCta {
@@ -638,7 +512,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .heroCopy,
-  .phoneCluster,
   .storyBg,
   .heroWash {
     transform: none !important;
