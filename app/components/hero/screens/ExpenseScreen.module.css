@@ -1,0 +1,93 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(228, 231, 236, 0.6);
+  border-radius: 20px;
+  box-shadow:
+    0 2px 12px rgba(10, 22, 40, 0.02),
+    0 1px 2px rgba(10, 22, 40, 0.012);
+  padding: 16px;
+}
+
+.month {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.metricLabel {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: #667085;
+}
+
+.metricValue {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.metricEmph {
+  font-size: 14px;
+}
+
+.rowTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.rowSub {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #667085;
+  line-height: 1.35;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 16px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 12px;
+}

@@ -8,12 +8,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { dictionaries, type Locale } from "./i18n";
+import { translations, type Locale, type Translations } from "./i18n";
 
 type LocaleContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (typeof dictionaries)[Locale];
+  t: Translations;
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -29,7 +29,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       setLocale,
-      t: dictionaries[locale],
+      t: translations[locale],
     }),
     [locale, setLocale],
   );

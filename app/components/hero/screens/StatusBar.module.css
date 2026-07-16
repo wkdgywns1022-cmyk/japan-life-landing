@@ -1,0 +1,90 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 14px 28px 0;
+  box-sizing: border-box;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #111827;
+  flex-shrink: 0;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.signal {
+  width: 17px;
+  height: 11px;
+  background: currentColor;
+  clip-path: polygon(
+    0 100%,
+    20% 100%,
+    20% 70%,
+    40% 70%,
+    40% 45%,
+    60% 45%,
+    60% 22%,
+    80% 22%,
+    80% 0,
+    100% 0,
+    100% 100%
+  );
+}
+
+.wifi {
+  width: 15px;
+  height: 11px;
+  border: 1.7px solid currentColor;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0;
+  position: relative;
+}
+
+.wifi::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+.battery {
+  width: 24px;
+  height: 11px;
+  border: 1.3px solid currentColor;
+  border-radius: 3px;
+  padding: 1.5px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.battery::before {
+  content: "";
+  display: block;
+  width: 75%;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.battery::after {
+  content: "";
+  position: absolute;
+  right: -3.5px;
+  top: 50%;
+  width: 2px;
+  height: 5px;
+  border-radius: 0 1px 1px 0;
+  background: currentColor;
+  transform: translateY(-50%);
+}

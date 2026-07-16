@@ -31,6 +31,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 function HeroContent() {
   const reduceMotion = useReducedMotion();
   const { locale, t } = useLocale();
+  const hero = t.hero;
 
   const fontClass =
     locale === "ja"
@@ -72,7 +73,7 @@ function HeroContent() {
             {...fadeUp}
             transition={{ duration: textDuration, ease, delay: textDelay }}
           >
-            {t.brand}
+            {hero.brand}
           </motion.p>
 
           <motion.h1
@@ -80,9 +81,9 @@ function HeroContent() {
             {...fadeUp}
             transition={{ duration: textDuration, ease, delay: textDelay + 0.04 }}
           >
-            {t.headlineLine1}
+            {hero.headlineLine1}
             <br />
-            {t.headlineLine2}
+            {hero.headlineLine2}
           </motion.h1>
 
           <motion.p
@@ -90,9 +91,9 @@ function HeroContent() {
             {...fadeUp}
             transition={{ duration: textDuration, ease, delay: textDelay + 0.08 }}
           >
-            {t.subtitleLine1}
+            {hero.subtitleLine1}
             <br />
-            {t.subtitleLine2}
+            {hero.subtitleLine2}
           </motion.p>
 
           <motion.p
@@ -100,7 +101,7 @@ function HeroContent() {
             {...fadeUp}
             transition={{ duration: textDuration, ease, delay: textDelay + 0.1 }}
           >
-            {t.support}
+            {hero.support}
           </motion.p>
 
           <motion.div
@@ -109,10 +110,10 @@ function HeroContent() {
             transition={{ duration: 0.65, ease, delay: buttonDelay }}
           >
             <a className={styles.btnPrimary} href="#beta">
-              {t.ctaBeta}
+              {hero.ctaBeta}
             </a>
             <a className={styles.btnSecondary} href="#features">
-              <span className={styles.btnSecondaryText}>{t.ctaExplore}</span>
+              <span className={styles.btnSecondaryText}>{hero.ctaExplore}</span>
               <span className={styles.btnArrow}>
                 <IconArrowRight size={16} />
               </span>

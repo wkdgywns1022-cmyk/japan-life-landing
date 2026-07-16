@@ -8,7 +8,7 @@ export default function LanguageSelector() {
   const { locale, setLocale, t } = useLocale();
 
   return (
-    <div className={styles.wrap} role="group" aria-label={t.langAria}>
+    <div className={styles.wrap} role="group" aria-label={t.hero.langAria}>
       {LOCALES.map((item) => {
         const active = item.id === locale;
         return (
