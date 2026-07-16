@@ -61,54 +61,44 @@ const FEATURES: {
   screen: PhoneScreenId;
   sectionKey: "intro" | "checklist" | "garbage" | "japanese" | "expense" | "shortcuts";
   progressKey: "intro" | "checklist" | "garbage" | "japanese" | "expense" | "shortcuts";
-  bg: string;
 }[] = [
   {
     id: "product-intro",
     screen: "home",
     sectionKey: "intro",
     progressKey: "intro",
-    bg: "linear-gradient(180deg, #f7fbff 0%, #ffffff 55%, #ffffff 100%)",
   },
   {
     id: "feature-checklist",
     screen: "checklist",
     sectionKey: "checklist",
     progressKey: "checklist",
-    bg: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
   },
   {
     id: "feature-garbage",
     screen: "garbage",
     sectionKey: "garbage",
     progressKey: "garbage",
-    bg: "linear-gradient(180deg, #f6f8fb 0%, #fbfcfe 50%, #ffffff 100%)",
   },
   {
     id: "feature-japanese",
     screen: "wardOfficeJapanese",
     sectionKey: "japanese",
     progressKey: "japanese",
-    bg: "linear-gradient(180deg, #f8f7ff 0%, #fcfbff 45%, #ffffff 100%)",
   },
   {
     id: "feature-expense",
     screen: "expense",
     sectionKey: "expense",
     progressKey: "expense",
-    bg: "linear-gradient(180deg, #f5f9ff 0%, #fafcff 50%, #ffffff 100%)",
   },
   {
     id: "feature-shortcuts",
     screen: "lifeShortcuts",
     sectionKey: "shortcuts",
     progressKey: "shortcuts",
-    bg: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
   },
 ];
-
-const HERO_BG =
-  "radial-gradient(ellipse 50% 42% at 78% 24%, rgba(92, 141, 255, 0.07), transparent 70%), radial-gradient(ellipse 38% 32% at 14% 76%, rgba(37, 99, 235, 0.04), transparent 68%), linear-gradient(180deg, #fafbfd 0%, #f8fbff 45%, #f7fafd 100%)";
 
 function screenForStage(stage: StageId): PhoneScreenId {
   if (stage === HERO_ID) return "home";
@@ -300,11 +290,6 @@ export default function PhoneJourney() {
       ? -1
       : FEATURES.findIndex((f) => f.id === activeStage);
 
-  const storyBg =
-    activeStage === HERO_ID
-      ? HERO_BG
-      : (FEATURES.find((f) => f.id === activeStage)?.bg ?? HERO_BG);
-
   const fontClass =
     locale === "ja"
       ? notoSansJp.className
@@ -357,7 +342,6 @@ export default function PhoneJourney() {
     <div
       ref={journeyRef}
       className={`${styles.journey} ${fontClass}`}
-      style={{ ["--story-bg" as string]: storyBg }}
       data-compact={isCompact ? "true" : "false"}
     >
       <div className={styles.storyBg} aria-hidden="true" />

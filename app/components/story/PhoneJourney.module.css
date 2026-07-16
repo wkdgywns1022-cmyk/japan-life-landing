@@ -1,20 +1,20 @@
 .journey {
   --hero-parallax: 0;
-  --story-bg: #ffffff;
   position: relative;
   isolation: isolate;
-  background: #ffffff;
+  background: linear-gradient(
+    180deg,
+    #f7fbff 0%,
+    #ffffff 18%,
+    #ffffff 82%,
+    #f8fbff 100%
+  );
   color: var(--lp-text-primary);
   max-width: 100%;
 }
 
 .storyBg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: var(--story-bg);
-  transition: background 850ms ease-in-out;
+  display: none;
 }
 
 .heroWash {
@@ -502,6 +502,11 @@
     border: 0;
     box-shadow: none;
     overflow: visible;
+    transform: none;
+    filter: none;
+    perspective: none;
+    contain: none;
+    will-change: auto;
     /* Soft page fade so scrolling text doesn't show through the phone */
     background-image: linear-gradient(
       180deg,

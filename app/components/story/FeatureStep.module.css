@@ -53,6 +53,18 @@
   pointer-events: none;
 }
 
+.textBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+}
+
+.textInactive {
+  opacity: 0.45;
+  transform: none;
+}
+
 .step:first-child {
   min-height: 78vh;
   padding-top: 0.5rem;
@@ -122,6 +134,10 @@
 
   .inactive {
     pointer-events: auto;
+  }
+
+  .textInactive {
+    opacity: 0.45;
   }
 }
 

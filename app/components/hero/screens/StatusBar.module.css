@@ -12,53 +12,28 @@
   flex-shrink: 0;
 }
 
-.icons {
+.time {
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.statusIcons {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 4px;
+  color: currentColor;
+  flex-shrink: 0;
+  line-height: 0;
 }
 
-.signal {
-  width: 17px;
-  height: 11px;
-  background: currentColor;
-  clip-path: polygon(
-    0 100%,
-    20% 100%,
-    20% 70%,
-    40% 70%,
-    40% 45%,
-    60% 45%,
-    60% 22%,
-    80% 22%,
-    80% 0,
-    100% 0,
-    100% 100%
-  );
-}
-
-.wifi {
-  width: 15px;
-  height: 11px;
-  border: 1.7px solid currentColor;
-  border-bottom: 0;
-  border-radius: 50% 50% 0 0;
-  position: relative;
-}
-
-.wifi::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 50%;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-  transform: translateX(-50%);
+.iconSvg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .battery {
+  display: block;
   width: 24px;
   height: 11px;
   border: 1.3px solid currentColor;
@@ -66,6 +41,7 @@
   padding: 1.5px;
   position: relative;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .battery::before {

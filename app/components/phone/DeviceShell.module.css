@@ -26,7 +26,7 @@
   padding: 0;
   overflow: visible;
   isolation: auto;
-  will-change: transform;
+  flex-shrink: 0;
 }
 
 .hero {
@@ -100,7 +100,6 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.32);
   transform: scale(var(--phone-scale));
   transform-origin: top left;
-  will-change: transform;
 }
 
 .silent,
@@ -222,173 +221,69 @@
   }
 
   .story {
-    --phone-h-cap: 100vh;
-    --phone-scale: min(0.82, calc((var(--phone-h-cap) - 120px) / 852px));
-  }
-}
-
-@supports (height: 1svh) {
-  @media (max-width: 960px) {
-    .story {
-      --phone-h-cap: 100svh;
-    }
+    --phone-scale: min(0.82, calc((100svh - 120px) / 852px));
   }
 }
 
 @media (max-width: 899px) {
   .hero {
-    --phone-h-cap: 68vh;
-    --phone-scale: min(
-      calc(72vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(320px / 393px)
-    );
+    --phone-scale: min(calc(72vw / 393px), calc(320px / 393px));
   }
 
-  /* Compact product-story phone — stays visible under sticky */
+  /*
+    Sticky story phone: width-only scale.
+    Avoid svh/dvh so browser chrome expand/collapse cannot resize the shell mid-scroll.
+  */
   .story {
-    --phone-h-cap: 44vh;
-    --phone-scale: min(
-      calc(58vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(250px / 393px)
-    );
+    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
   }
 
   .feature {
-    --phone-h-cap: 44vh;
-    --phone-scale: min(
-      calc(58vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(250px / 393px)
-    );
+    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
   }
 
   .stage {
     max-width: 100%;
   }
-}
 
-@supports (height: 1svh) {
-  @media (max-width: 899px) {
-    .hero {
-      --phone-h-cap: 68svh;
-    }
-
-    .story,
-    .feature {
-      --phone-h-cap: 44svh;
-    }
+  .floating {
+    animation: none;
   }
 }
 
 @media (max-width: 767px) {
   .hero {
-    --phone-h-cap: 68vh;
-    --phone-scale: min(
-      calc(78vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(330px / 393px)
-    );
+    --phone-scale: min(calc(78vw / 393px), calc(330px / 393px));
   }
 
   .story {
-    --phone-h-cap: 44vh;
-    --phone-scale: min(
-      calc(58vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(250px / 393px)
-    );
+    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
   }
 
   .feature {
-    --phone-h-cap: 44vh;
-    --phone-scale: min(
-      calc(58vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(250px / 393px)
-    );
-  }
-}
-
-@supports (height: 1svh) {
-  @media (max-width: 767px) {
-    .hero {
-      --phone-h-cap: 68svh;
-    }
-
-    .story,
-    .feature {
-      --phone-h-cap: 44svh;
-    }
+    --phone-scale: min(calc(58vw / 393px), calc(250px / 393px));
   }
 }
 
 @media (max-width: 360px) {
   .hero {
-    --phone-h-cap: 62vh;
-    --phone-scale: min(
-      calc(84vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(286px / 393px)
-    );
+    --phone-scale: min(calc(84vw / 393px), calc(286px / 393px));
   }
 
   .story,
   .feature {
-    --phone-h-cap: 38vh;
-    --phone-scale: min(
-      calc(54vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(220px / 393px)
-    );
-  }
-}
-
-@supports (height: 1svh) {
-  @media (max-width: 360px) {
-    .hero {
-      --phone-h-cap: 62svh;
-    }
-
-    .story,
-    .feature {
-      --phone-h-cap: 38svh;
-    }
+    --phone-scale: min(calc(54vw / 393px), calc(220px / 393px));
   }
 }
 
 @media (max-width: 899px) and (max-height: 560px) {
   .hero {
-    --phone-h-cap: 52vh;
-    --phone-scale: min(
-      calc(70vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(260px / 393px)
-    );
+    --phone-scale: min(calc(70vw / 393px), calc(260px / 393px));
   }
 
   .story,
   .feature {
-    --phone-h-cap: 34vh;
-    --phone-scale: min(
-      calc(50vw / 393px),
-      calc(var(--phone-h-cap) / 852px),
-      calc(200px / 393px)
-    );
-  }
-}
-
-@supports (height: 1svh) {
-  @media (max-width: 899px) and (max-height: 560px) {
-    .hero {
-      --phone-h-cap: 52svh;
-    }
-
-    .story,
-    .feature {
-      --phone-h-cap: 34svh;
-    }
+    --phone-scale: min(calc(50vw / 393px), calc(200px / 393px));
   }
 }
 
