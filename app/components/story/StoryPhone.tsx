@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { PhoneScreenId } from "../hero/i18n";
 import DeviceShell from "../phone/DeviceShell";
@@ -18,28 +18,39 @@ type Props = {
   screen: PhoneScreenId;
   demoActive?: boolean;
   floating?: boolean;
+  size?: "hero" | "story";
+  /** When true, hover pauses micro-demo (product-story). Hero leaves false. */
+  pauseOnHover?: boolean;
 };
 
 function ScreenContent({
   screen,
-  demoActive,
+  demoEnabled,
+  demoPaused,
 }: {
   screen: PhoneScreenId;
-  demoActive: boolean;
+  demoEnabled: boolean;
+  demoPaused: boolean;
 }) {
   switch (screen) {
     case "checklist":
-      return <ChecklistScreen demo active={demoActive} />;
+      return (
+        <ChecklistScreen demo enabled={demoEnabled} paused={demoPaused} />
+      );
     case "garbage":
-      return <GarbageScreen demo active={demoActive} />;
+      return <GarbageScreen demo enabled={demoEnabled} paused={demoPaused} />;
     case "wardOfficeJapanese":
-      return <WardOfficeScreen demo active={demoActive} />;
+      return (
+        <WardOfficeScreen demo enabled={demoEnabled} paused={demoPaused} />
+      );
     case "expense":
-      return <ExpenseScreen demo active={demoActive} />;
+      return <ExpenseScreen demo enabled={demoEnabled} paused={demoPaused} />;
     case "lifeShortcuts":
-      return <LifeShortcutsScreen />;
+      return (
+        <LifeShortcutsScreen demo enabled={demoEnabled} paused={demoPaused} />
+      );
     default:
-      return <HomeScreen />;
+      return <HomeScreen demo enabled={demoEnabled} paused={demoPaused} />;
   }
 }
 
@@ -47,27 +58,64 @@ export default function StoryPhone({
   screen,
   demoActive = false,
   floating = false,
+  size = "story",
+  pauseOnHover = false,
 }: Props) {
   const reduceMotion = useReducedMotion();
-  const [isMobile, setIsMobile] = useState(false);
-  const showHomeIndicator = screen !== "wardOfficeJapanese";
-  const simpleFade = Boolean(reduceMotion || isMobile);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [isCompact, setIsCompact] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [inView, setInView] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const sync = () => setIsMobile(mq.matches);
+    const mq = window.matchMedia("(max-width: 899px)");
+    const sync = () => setIsCompact(mq.matches);
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  useEffect(() => {
+    const node = wrapRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio > 0.15),
+      { threshold: [0, 0.15, 0.35] },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onVisibility = () => setPageVisible(document.visibilityState === "visible");
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  const demoEnabled =
+    Boolean(demoActive) && inView && pageVisible && !reduceMotion;
+  const demoPaused = pauseOnHover && hovered;
+
+  const mobileMotion = isCompact && !reduceMotion;
+  const reduced = Boolean(reduceMotion);
+
   return (
-    <div className={styles.wrap}>
-      <div className={styles.glow} aria-hidden="true" />
+    <div
+      ref={wrapRef}
+      className={styles.wrap}
+      onMouseEnter={() => {
+        if (pauseOnHover) setHovered(true);
+      }}
+      onMouseLeave={() => {
+        if (pauseOnHover) setHovered(false);
+      }}
+    >
       <DeviceShell
-        size="story"
-        floating={floating && !reduceMotion && !isMobile}
-        showHomeIndicator={showHomeIndicator}
+        size={size}
+        floating={floating && !reduceMotion && !isCompact}
+        showHomeIndicator
       >
         <div className={styles.layerHost}>
           <AnimatePresence initial={false}>
@@ -75,38 +123,63 @@ export default function StoryPhone({
               key={screen}
               className={styles.screenLayer}
               initial={
-                simpleFade
+                reduced
                   ? { opacity: 0 }
-                  : {
-                      opacity: 0,
-                      y: 8,
-                      scale: 0.992,
-                      filter: "blur(2px)",
-                    }
+                  : mobileMotion
+                    ? { opacity: 0, y: 5, scale: 0.995 }
+                    : {
+                        opacity: 0,
+                        y: 8,
+                        scale: 0.992,
+                        filter: "blur(2px)",
+                      }
               }
               animate={
-                simpleFade
+                reduced
                   ? { opacity: 1 }
-                  : {
-                      opacity: 1,
-                      y: 0,
-                      scale: 1,
-                      filter: "blur(0px)",
-                    }
+                  : mobileMotion
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        filter: "blur(0px)",
+                      }
               }
-              exit={simpleFade ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.992, filter: "blur(2px)" }}
+              exit={
+                reduced
+                  ? { opacity: 0 }
+                  : mobileMotion
+                    ? { opacity: 0, y: -3, scale: 0.995 }
+                    : {
+                        opacity: 0,
+                        y: -5,
+                        scale: 0.992,
+                        filter: "blur(2px)",
+                      }
+              }
               transition={
-                simpleFade
-                  ? { duration: 0.35, ease: "easeOut" }
-                  : {
-                      opacity: { duration: 0.55, ease: appleEase },
-                      y: { duration: 0.58, ease: appleEase },
-                      scale: { duration: 0.58, ease: appleEase },
-                      filter: { duration: 0.45, ease: appleEase },
-                    }
+                reduced
+                  ? { duration: 0.2, ease: "easeOut" }
+                  : mobileMotion
+                    ? {
+                        opacity: { duration: 0.5, ease: appleEase },
+                        y: { duration: 0.5, ease: appleEase },
+                        scale: { duration: 0.5, ease: appleEase },
+                      }
+                    : {
+                        opacity: { duration: 0.55, ease: appleEase },
+                        y: { duration: 0.58, ease: appleEase },
+                        scale: { duration: 0.58, ease: appleEase },
+                        filter: { duration: 0.45, ease: appleEase },
+                      }
               }
             >
-              <ScreenContent screen={screen} demoActive={demoActive} />
+              <ScreenContent
+                screen={screen}
+                demoEnabled={demoEnabled}
+                demoPaused={demoPaused}
+              />
             </motion.div>
           </AnimatePresence>
         </div>

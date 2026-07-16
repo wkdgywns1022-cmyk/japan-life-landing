@@ -1,66 +1,80 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./ExpenseScreen.module.css";
 
-type Props = {
-  demo?: boolean;
-  active?: boolean;
+type Phase =
+  | "summary"
+  | "entry"
+  | "digit1"
+  | "digit2"
+  | "digit3"
+  | "digit4"
+  | "saved"
+  | "hold";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "summary", holdMs: 1600 },
+  { state: "entry", holdMs: 700 },
+  { state: "digit1", holdMs: 350 },
+  { state: "digit2", holdMs: 350 },
+  { state: "digit3", holdMs: 350 },
+  { state: "digit4", holdMs: 900 },
+  { state: "saved", holdMs: 2800 },
+  { state: "hold", holdMs: 1600 },
+];
+
+const AMOUNTS: Record<Phase, string> = {
+  summary: "",
+  entry: "",
+  digit1: "3",
+  digit2: "3,4",
+  digit3: "3,48",
+  digit4: "3,480",
+  saved: "3,480",
+  hold: "3,480",
 };
 
-export default function ExpenseScreen({ demo = false, active = false }: Props) {
+type Props = {
+  demo?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
+};
+
+export default function ExpenseScreen({
+  demo = false,
+  enabled = false, paused = false,
+}: Props) {
   const { t } = useLocale();
   const reduceMotion = useReducedMotion();
   const e = t.phone.expense;
-  const [phase, setPhase] = useState<"summary" | "entry" | "saved">("summary");
-  const [amount, setAmount] = useState("");
-  const [played, setPlayed] = useState(false);
+  const steps = useMemo(() => STEPS, []);
 
-  useEffect(() => {
-    if (!demo || !active || played || reduceMotion) return;
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "summary",
+    startDelayMs: 850,
+  });
 
-    const timers: number[] = [];
-    timers.push(window.setTimeout(() => setPhase("entry"), 700));
-    timers.push(
-      window.setTimeout(() => {
-        setAmount("3");
-      }, 1100),
-    );
-    timers.push(
-      window.setTimeout(() => {
-        setAmount("3,4");
-      }, 1350),
-    );
-    timers.push(
-      window.setTimeout(() => {
-        setAmount("3,48");
-      }, 1600),
-    );
-    timers.push(
-      window.setTimeout(() => {
-        setAmount("3,480");
-      }, 1850),
-    );
-    timers.push(
-      window.setTimeout(() => {
-        setPhase("saved");
-        setPlayed(true);
-      }, 2600),
-    );
+  const isEntry =
+    phase === "entry" ||
+    phase === "digit1" ||
+    phase === "digit2" ||
+    phase === "digit3" ||
+    phase === "digit4";
+  const isSaved = phase === "saved" || phase === "hold";
+  const amount = AMOUNTS[phase];
 
-    return () => {
-      timers.forEach((id) => window.clearTimeout(id));
-    };
-  }, [demo, active, played, reduceMotion]);
-
-  const expenseValue =
-    phase === "saved" ? e.expenseValueAfter : e.expenseValue;
-  const balanceValue =
-    phase === "saved" ? e.balanceValueAfter : e.balanceValue;
+  const expenseValue = isSaved ? e.expenseValueAfter : e.expenseValue;
+  const balanceValue = isSaved ? e.balanceValueAfter : e.balanceValue;
 
   return (
     <div className={styles.root}>
@@ -77,7 +91,11 @@ export default function ExpenseScreen({ demo = false, active = false }: Props) {
             </div>
             <div>
               <p className={styles.metricLabel}>{e.expense}</p>
-              <p className={styles.metricValue}>{expenseValue}</p>
+              <p
+                className={`${styles.metricValue} ${isSaved ? styles.metricPulse : ""}`}
+              >
+                {expenseValue}
+              </p>
             </div>
             <div>
               <p className={styles.metricLabel}>{e.balance}</p>
@@ -89,14 +107,14 @@ export default function ExpenseScreen({ demo = false, active = false }: Props) {
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {phase === "entry" ? (
+          {isEntry ? (
             <motion.div
               key="entry"
               className={`${styles.card} ${styles.entry}`}
               initial={reduceMotion ? false : { opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             >
               <p className={styles.rowTitle}>{e.addTitle}</p>
               <div className={styles.field}>
@@ -108,17 +126,26 @@ export default function ExpenseScreen({ demo = false, active = false }: Props) {
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>{e.categoryLabel}</span>
-                <span className={styles.categoryPill}>{e.categoryFood}</span>
+                <span
+                  className={`${styles.categoryPill} ${phase === "digit4" ? styles.categoryActive : ""}`}
+                >
+                  {e.categoryFood}
+                </span>
+              </div>
+              <div
+                className={`${styles.saveHint} ${phase === "digit4" ? styles.saveHintActive : ""}`}
+              >
+                {e.viewMonthly}
               </div>
             </motion.div>
-          ) : phase === "saved" ? (
+          ) : isSaved ? (
             <motion.div
               key="saved"
               className={`${styles.card} ${styles.saved}`}
               initial={reduceMotion ? false : { opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className={styles.savedRow}>
                 <div>

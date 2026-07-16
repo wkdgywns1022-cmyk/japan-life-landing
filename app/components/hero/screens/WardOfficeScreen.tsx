@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./WardOfficeScreen.module.css";
@@ -28,36 +29,42 @@ function RubyText({
   );
 }
 
+type Phase = "list" | "highlight" | "staff" | "return";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "list", holdMs: 2000 },
+  { state: "highlight", holdMs: 1600 },
+  { state: "staff", holdMs: 3200 },
+  { state: "return", holdMs: 1800 },
+];
+
 type Props = {
   demo?: boolean;
-  active?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
 };
 
 export default function WardOfficeScreen({
   demo = false,
-  active = false,
+  enabled = false, paused = false,
 }: Props) {
   const { locale, t } = useLocale();
   const reduceMotion = useReducedMotion();
   const w = t.phone.wardOffice;
-  const [staffMode, setStaffMode] = useState(false);
-  const [played, setPlayed] = useState(false);
   const first = w.phrases[0];
+  const steps = useMemo(() => STEPS, []);
 
-  useEffect(() => {
-    if (!demo || !active || played || reduceMotion) return;
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "list",
+    startDelayMs: 850,
+  });
 
-    const enter = window.setTimeout(() => setStaffMode(true), 1200);
-    const leave = window.setTimeout(() => {
-      setStaffMode(false);
-      setPlayed(true);
-    }, 3200);
-
-    return () => {
-      window.clearTimeout(enter);
-      window.clearTimeout(leave);
-    };
-  }, [demo, active, played, reduceMotion]);
+  const staffMode = phase === "staff";
+  const highlight = phase === "highlight";
 
   return (
     <div className={styles.root}>
@@ -70,7 +77,7 @@ export default function WardOfficeScreen({
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className={styles.staff}>
               <p className={styles.staffJa}>{first.ja}</p>
@@ -83,7 +90,7 @@ export default function WardOfficeScreen({
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <div>
               <h2 className={styles.title}>{w.title}</h2>
@@ -103,8 +110,11 @@ export default function WardOfficeScreen({
               ))}
             </div>
 
-            {w.phrases.slice(0, 2).map((phrase) => (
-              <div key={phrase.ja} className={styles.card}>
+            {w.phrases.slice(0, 2).map((phrase, index) => (
+              <div
+                key={phrase.ja}
+                className={`${styles.card} ${index === 0 && highlight ? styles.cardHighlight : ""}`}
+              >
                 <p className={styles.category}>{phrase.category}</p>
                 <RubyText segments={phrase.ruby} />
                 {locale === "ja" ? (

@@ -1,29 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useReducedMotion } from "motion/react";
 import { IconCheck, IconChevron, IconToday } from "../icons";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./ChecklistScreen.module.css";
 
+type Phase = "idle" | "done" | "hold";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "idle", holdMs: 2200 },
+  { state: "done", holdMs: 3200 },
+  { state: "hold", holdMs: 1800 },
+];
+
 type Props = {
   demo?: boolean;
-  active?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
 };
 
-export default function ChecklistScreen({ demo = false, active = false }: Props) {
+export default function ChecklistScreen({
+  demo = false,
+  enabled = false, paused = false,
+}: Props) {
   const { t, locale } = useLocale();
+  const reduceMotion = useReducedMotion();
   const c = t.phone.checklist;
   const showJa = locale !== "ja";
-  const [done, setDone] = useState(false);
+  const steps = useMemo(() => STEPS, []);
 
-  useEffect(() => {
-    if (!demo || !active || done) return;
-    const id = window.setTimeout(() => setDone(true), 900);
-    return () => window.clearTimeout(id);
-  }, [demo, active, done]);
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "idle",
+    startDelayMs: 850,
+  });
 
+  const done = phase === "done" || phase === "hold";
   const progressCount = done ? c.progressCountDone : c.progressCount;
   const progressPercent = done ? c.progressPercentDone : c.progressPercent;
 

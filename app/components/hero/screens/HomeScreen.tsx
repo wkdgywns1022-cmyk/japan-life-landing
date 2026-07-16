@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useReducedMotion } from "motion/react";
 import {
   IconChecklist,
   IconChevron,
@@ -16,13 +18,42 @@ import {
   IconTrash,
 } from "../icons";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./HomeScreen.module.css";
 
-export default function HomeScreen() {
+type Phase = "idle" | "weather" | "garbage" | "expense";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "idle", holdMs: 1800 },
+  { state: "weather", holdMs: 2200 },
+  { state: "idle", holdMs: 900 },
+  { state: "garbage", holdMs: 2400 },
+  { state: "idle", holdMs: 900 },
+  { state: "expense", holdMs: 2600 },
+];
+
+type Props = {
+  demo?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
+};
+
+export default function HomeScreen({ demo = false, enabled = false, paused = false }: Props) {
   const { t } = useLocale();
+  const reduceMotion = useReducedMotion();
   const h = t.phone.home;
+  const steps = useMemo(() => STEPS, []);
+
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "idle",
+    startDelayMs: 850,
+  });
 
   return (
     <div className={styles.root}>
@@ -46,7 +77,9 @@ export default function HomeScreen() {
                 <span>{h.district}</span>
               </div>
             </div>
-            <span className={styles.weather}>
+            <span
+              className={`${styles.weather} ${phase === "weather" ? styles.weatherPulse : ""}`}
+            >
               <IconSunny size={16} />
               {h.weather}
             </span>
@@ -67,7 +100,9 @@ export default function HomeScreen() {
             </div>
           </div>
 
-          <div className={styles.infoRow}>
+          <div
+            className={`${styles.infoRow} ${phase === "garbage" ? styles.rowEmphasis : ""}`}
+          >
             <span
               className={styles.infoIcon}
               style={{ background: "#ecfdf3", color: "#12b76a" }}
@@ -104,7 +139,9 @@ export default function HomeScreen() {
           </div>
         </div>
 
-        <div className={`${styles.card} ${styles.expense}`}>
+        <div
+          className={`${styles.card} ${styles.expense} ${phase === "expense" ? styles.cardEmphasis : ""}`}
+        >
           <div className={styles.expenseHead}>
             <span className={styles.expenseIcon}>
               <IconPayments size={22} />
@@ -133,6 +170,10 @@ export default function HomeScreen() {
               </p>
             </div>
           </div>
+          <div
+            className={`${styles.demoBar} ${phase === "expense" ? styles.demoBarActive : ""}`}
+            aria-hidden="true"
+          />
         </div>
 
         <p className={styles.sectionTitle}>{h.lifeShortcuts}</p>

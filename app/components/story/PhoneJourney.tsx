@@ -38,6 +38,7 @@ const appleEase = [0.22, 1, 0.36, 1] as const;
 const HERO_ID = "hero-stage";
 const PHONE_DELAY_MS = 280;
 const HERO_ROTATE_MS = 2200;
+const COMPACT_MQ = "(max-width: 899px)";
 const HERO_SCREENS: PhoneScreenId[] = [
   "home",
   "checklist",
@@ -122,6 +123,7 @@ export default function PhoneJourney() {
 
   const [activeStage, setActiveStage] = useState<StageId>(HERO_ID);
   const [displayScreen, setDisplayScreen] = useState<PhoneScreenId>("home");
+  const [isCompact, setIsCompact] = useState(false);
   const activeStageRef = useRef<StageId>(HERO_ID);
 
   const nodesRef = useRef(new Map<StageId, HTMLElement>());
@@ -152,7 +154,14 @@ export default function PhoneJourney() {
     setActiveStage(next);
   }, []);
 
-  // Single IntersectionObserver — pick step closest to viewport center
+  useEffect(() => {
+    const mq = window.matchMedia(COMPACT_MQ);
+    const sync = () => setIsCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   useEffect(() => {
     const stageIds: StageId[] = [HERO_ID, ...FEATURES.map((f) => f.id)];
     const nodes = stageIds
@@ -161,7 +170,7 @@ export default function PhoneJourney() {
     if (nodes.length === 0) return;
 
     const pickClosest = () => {
-      const viewportCenter = window.innerHeight * 0.42;
+      const viewportCenter = window.innerHeight * (isCompact ? 0.38 : 0.42);
       let bestId: StageId = activeStageRef.current;
       let bestDist = Number.POSITIVE_INFINITY;
 
@@ -169,8 +178,8 @@ export default function PhoneJourney() {
         const node = nodesRef.current.get(id);
         if (!node) continue;
         const rect = node.getBoundingClientRect();
-        if (rect.bottom < 80 || rect.top > window.innerHeight - 80) continue;
-        const center = rect.top + rect.height * 0.35;
+        if (rect.bottom < 60 || rect.top > window.innerHeight - 60) continue;
+        const center = rect.top + rect.height * (isCompact ? 0.4 : 0.35);
         const dist = Math.abs(center - viewportCenter);
         if (dist < bestDist) {
           bestDist = dist;
@@ -181,23 +190,21 @@ export default function PhoneJourney() {
       setStageStable(bestId);
     };
 
-    const observer = new IntersectionObserver(
-      () => {
-        pickClosest();
-      },
-      {
-        root: null,
-        rootMargin: "-35% 0px -45% 0px",
-        threshold: [0.2, 0.35, 0.5],
-      },
-    );
+    const observer = new IntersectionObserver(() => pickClosest(), {
+      root: null,
+      rootMargin: isCompact ? "-20% 0px -35% 0px" : "-35% 0px -45% 0px",
+      threshold: [0.15, 0.3, 0.5],
+    });
 
     nodes.forEach((node) => observer.observe(node));
     pickClosest();
-    return () => observer.disconnect();
-  }, [locale, setStageStable]);
+    window.addEventListener("scroll", pickClosest, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", pickClosest);
+    };
+  }, [locale, setStageStable, isCompact]);
 
-  // Hero auto-rotation
   useEffect(() => {
     clearRotate();
     if (activeStage !== HERO_ID || reduceMotion) return;
@@ -220,7 +227,6 @@ export default function PhoneJourney() {
     };
   }, [activeStage, reduceMotion, clearRotate]);
 
-  // Feature screen change after text begins
   useEffect(() => {
     if (activeStage === HERO_ID) return;
     clearRotate();
@@ -232,14 +238,13 @@ export default function PhoneJourney() {
     return () => window.clearTimeout(id);
   }, [activeStage, displayScreen, reduceMotion, clearRotate]);
 
-  // Subtle hero parallax via CSS custom properties (desktop only)
   useEffect(() => {
     if (reduceMotion) {
       journeyRef.current?.style.setProperty("--hero-parallax", "0");
       return;
     }
 
-    const mq = window.matchMedia("(max-width: 767px)");
+    const mq = window.matchMedia(COMPACT_MQ);
     const disableParallax = () => {
       journeyRef.current?.style.setProperty("--hero-parallax", "0");
     };
@@ -271,10 +276,13 @@ export default function PhoneJourney() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    mq.addEventListener("change", disableParallax);
+    const onMq = () => {
+      if (mq.matches) disableParallax();
+    };
+    mq.addEventListener("change", onMq);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      mq.removeEventListener("change", disableParallax);
+      mq.removeEventListener("change", onMq);
       cancelAnimationFrame(raf);
     };
   }, [reduceMotion, locale]);
@@ -323,7 +331,10 @@ export default function PhoneJourney() {
   const scrollToFeature = (id: string) => {
     const node = nodesRef.current.get(id as StageId);
     if (!node) return;
-    node.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    node.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: isCompact ? "start" : "center",
+    });
     setStageStable(id as StageId);
   };
 
@@ -335,11 +346,19 @@ export default function PhoneJourney() {
   const progressActiveId =
     activeStage === HERO_ID ? FEATURES[0].id : activeStage;
 
+  const introFeature = FEATURES[0];
+  const remainingFeatures = FEATURES.slice(1);
+  const introCopy = t.sections[introFeature.sectionKey];
+
+  const storyPhoneScreen =
+    activeStage === HERO_ID ? FEATURES[0].screen : displayScreen;
+
   return (
     <div
       ref={journeyRef}
       className={`${styles.journey} ${fontClass}`}
       style={{ ["--story-bg" as string]: storyBg }}
+      data-compact={isCompact ? "true" : "false"}
     >
       <div className={styles.storyBg} aria-hidden="true" />
       <div className={styles.heroWash} aria-hidden="true" />
@@ -407,7 +426,8 @@ export default function PhoneJourney() {
                 <StoryPhone
                   screen={displayScreen}
                   demoActive={demoActive}
-                  floating={activeStage === HERO_ID}
+                  floating={activeStage === HERO_ID && !isCompact}
+                  size="hero"
                 />
               </div>
             </div>
@@ -416,24 +436,43 @@ export default function PhoneJourney() {
           <div className={styles.blend} aria-hidden="true" />
 
           <div className={styles.storySteps}>
-            {FEATURES.map((feature, index) => {
+            <FeatureStep
+              id={introFeature.id}
+              index={0}
+              screen={introFeature.screen}
+              heading={introCopy.heading}
+              body={introCopy.body}
+              active={activeStage === introFeature.id}
+              stepRef={setNodeRef(introFeature.id)}
+            />
+
+            {/* In-flow shared phone — visible below 900px only */}
+            <div className={styles.sharedStoryPhone}>
+              <StoryPhone
+                screen={storyPhoneScreen}
+                demoActive={demoActive}
+                pauseOnHover
+              />
+              <ProgressDots
+                items={progressItems}
+                activeId={progressActiveId}
+                onSelect={scrollToFeature}
+                orientation="horizontal"
+              />
+            </div>
+
+            {remainingFeatures.map((feature, index) => {
               const copy = t.sections[feature.sectionKey];
               return (
                 <FeatureStep
                   key={feature.id}
                   id={feature.id}
-                  index={index}
+                  index={index + 1}
                   screen={feature.screen}
                   heading={copy.heading}
                   body={copy.body}
                   active={activeStage === feature.id}
                   stepRef={setNodeRef(feature.id)}
-                  mobilePhone={
-                    <StoryPhone
-                      screen={feature.screen}
-                      demoActive={activeStage === feature.id}
-                    />
-                  }
                 />
               );
             })}
@@ -452,12 +491,16 @@ export default function PhoneJourney() {
                 screen={displayScreen}
                 demoActive={demoActive}
                 floating={activeStage === HERO_ID}
+                pauseOnHover
               />
-              <ProgressDots
-                items={progressItems}
-                activeId={progressActiveId}
-                onSelect={scrollToFeature}
-              />
+              <div className={styles.clusterDots}>
+                <ProgressDots
+                  items={progressItems}
+                  activeId={progressActiveId}
+                  onSelect={scrollToFeature}
+                  orientation="vertical"
+                />
+              </div>
             </div>
           </div>
         </div>

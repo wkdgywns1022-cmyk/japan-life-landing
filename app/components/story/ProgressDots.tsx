@@ -11,11 +11,20 @@ type Props = {
   items: Dot[];
   activeId: string;
   onSelect: (id: string) => void;
+  orientation?: "vertical" | "horizontal";
 };
 
-export default function ProgressDots({ items, activeId, onSelect }: Props) {
+export default function ProgressDots({
+  items,
+  activeId,
+  onSelect,
+  orientation = "vertical",
+}: Props) {
   return (
-    <nav className={styles.nav} aria-label="Feature progress">
+    <nav
+      className={`${styles.nav} ${orientation === "horizontal" ? styles.horizontal : styles.vertical}`}
+      aria-label="Feature progress"
+    >
       {items.map((item) => {
         const active = item.id === activeId;
         return (

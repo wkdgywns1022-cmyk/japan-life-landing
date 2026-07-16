@@ -1,34 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { IconLocation, IconTrash } from "../icons";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./GarbageScreen.module.css";
 
+type Phase = "plastic" | "burnable";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "plastic", holdMs: 3000 },
+  { state: "burnable", holdMs: 3000 },
+];
+
 type Props = {
   demo?: boolean;
-  active?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
 };
 
-export default function GarbageScreen({ demo = false, active = false }: Props) {
+export default function GarbageScreen({
+  demo = false,
+  enabled = false, paused = false,
+}: Props) {
   const { t } = useLocale();
   const reduceMotion = useReducedMotion();
   const g = t.phone.garbage;
-  const [showBurnable, setShowBurnable] = useState(false);
-  const [played, setPlayed] = useState(false);
+  const steps = useMemo(() => STEPS, []);
 
-  useEffect(() => {
-    if (!demo || !active || played || reduceMotion) return;
-    const id = window.setTimeout(() => {
-      setShowBurnable(true);
-      setPlayed(true);
-    }, 1800);
-    return () => window.clearTimeout(id);
-  }, [demo, active, played, reduceMotion]);
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "plastic",
+    startDelayMs: 850,
+  });
 
+  const showBurnable = phase === "burnable";
   const item = showBurnable ? g.burnable : g.plastic;
   const accent = showBurnable
     ? { bg: "#fff6ed", fg: "#ef6820" }
@@ -58,7 +70,7 @@ export default function GarbageScreen({ demo = false, active = false }: Props) {
             initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className={styles.nextLabel}>{g.nextLabel}</p>
             <div className={styles.heroMain}>
@@ -79,7 +91,9 @@ export default function GarbageScreen({ demo = false, active = false }: Props) {
           </motion.div>
         </AnimatePresence>
 
-        <div className={styles.todayCard}>
+        <div
+          className={`${styles.todayCard} ${!showBurnable ? styles.todayActive : ""}`}
+        >
           <p className={styles.todayLabel}>{g.todayLabel}</p>
           <div className={styles.todayRow}>
             <span className={styles.dot} style={{ background: "#2563eb" }} />

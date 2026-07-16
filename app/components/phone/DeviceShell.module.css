@@ -1,22 +1,35 @@
 .stage {
   --phone-w: 393px;
   --phone-h: 852px;
-  --bezel: 11px;
+  --bezel: 10px;
   --outer-radius: 56px;
-  --inner-radius: 46px;
+  --inner-radius: 47px;
   --island-w: 126px;
   --island-h: 37px;
+  --phone-screen-top: var(--bezel);
+  --phone-screen-right: var(--bezel);
+  --phone-screen-bottom: var(--bezel);
+  --phone-screen-left: var(--bezel);
+  --phone-screen-radius: var(--inner-radius);
   --phone-scale: 0.58;
 
   position: relative;
+  display: block;
   width: calc(var(--phone-w) * var(--phone-scale));
   height: calc(var(--phone-h) * var(--phone-scale));
+  aspect-ratio: 393 / 852;
   margin-inline: auto;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+  isolation: auto;
   will-change: transform;
 }
 
 .hero {
-  /* Match story phone so Hero → Story feels like one continuous device */
   --phone-scale: min(0.915, calc((100dvh - 140px) / 852px));
 }
 
@@ -24,7 +37,6 @@
   --phone-scale: 0.58;
 }
 
-/* ~360px wide, capped so the full device fits in the viewport */
 .story {
   --phone-scale: min(0.915, calc((100dvh - 140px) / 852px));
 }
@@ -45,14 +57,18 @@
 
 .glow {
   position: absolute;
-  width: 76%;
-  height: 46%;
-  bottom: -2%;
+  width: 88%;
+  height: 42%;
+  bottom: -4%;
   left: 50%;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(130, 140, 160, 0.2), transparent 72%);
-  filter: blur(34px);
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.06),
+    transparent 70%
+  );
+  filter: blur(28px);
   pointer-events: none;
   z-index: 0;
 }
@@ -70,42 +86,21 @@
   background:
     linear-gradient(
       155deg,
-      #4a4a4c 0%,
-      #2c2c2e 18%,
-      #1c1c1e 52%,
-      #2a2a2c 82%,
-      #3a3a3c 100%
+      #3e3e42 0%,
+      #2a2a2e 22%,
+      #17191d 55%,
+      #222226 82%,
+      #323236 100%
     );
   box-shadow:
-    0 0 0 0.5px rgba(255, 255, 255, 0.22) inset,
-    0 1px 0 rgba(255, 255, 255, 0.1) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.35) inset,
-    0 40px 80px -20px rgba(120, 130, 150, 0.4),
-    0 20px 40px -16px rgba(140, 148, 164, 0.28),
-    0 8px 16px -8px rgba(150, 158, 170, 0.18);
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 8px 22px rgba(15, 23, 42, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32);
   transform: scale(var(--phone-scale));
   transform-origin: top left;
   will-change: transform;
-}
-
-.device::before {
-  content: "";
-  position: absolute;
-  inset: 1.5px;
-  border-radius: calc(var(--outer-radius) - 1.5px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  z-index: 2;
-}
-
-.device::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-  z-index: 2;
 }
 
 .silent,
@@ -156,12 +151,12 @@
   z-index: 1;
   width: 100%;
   height: 100%;
-  border-radius: var(--inner-radius);
+  border-radius: var(--phone-screen-radius);
   overflow: hidden;
   background: #fafafa;
   box-shadow:
-    0 0 0 1px #0a0a0a,
-    0 0 0 2px rgba(255, 255, 255, 0.04) inset;
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.04);
 }
 
 .island {
@@ -183,6 +178,8 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -225,38 +222,172 @@
   }
 
   .story {
-    --phone-scale: min(0.82, calc((100dvh - 120px) / 852px));
+    --phone-h-cap: 100vh;
+    --phone-scale: min(0.82, calc((var(--phone-h-cap) - 120px) / 852px));
+  }
+}
+
+@supports (height: 1svh) {
+  @media (max-width: 960px) {
+    .story {
+      --phone-h-cap: 100svh;
+    }
+  }
+}
+
+@media (max-width: 899px) {
+  .hero {
+    --phone-h-cap: 68vh;
+    --phone-scale: min(
+      calc(72vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(320px / 393px)
+    );
+  }
+
+  .story {
+    --phone-h-cap: 66vh;
+    --phone-scale: min(
+      calc(70vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(300px / 393px)
+    );
+  }
+
+  .feature {
+    --phone-h-cap: 66vh;
+    --phone-scale: min(
+      calc(70vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(300px / 393px)
+    );
+  }
+
+  .stage {
+    max-width: 100%;
+  }
+}
+
+@supports (height: 1svh) {
+  @media (max-width: 899px) {
+    .hero {
+      --phone-h-cap: 68svh;
+    }
+
+    .story,
+    .feature {
+      --phone-h-cap: 66svh;
+    }
   }
 }
 
 @media (max-width: 767px) {
-  .hero,
-  .story {
-    /* ~75vw wide, also capped so Hero stays within one viewport */
+  .hero {
+    --phone-h-cap: 68vh;
     --phone-scale: min(
-      calc(75vw / 393px),
-      calc((100svh - 270px) / 852px),
-      0.78
+      calc(78vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(330px / 393px)
+    );
+  }
+
+  .story {
+    --phone-h-cap: 66vh;
+    --phone-scale: min(
+      calc(76vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(320px / 393px)
     );
   }
 
   .feature {
-    --phone-scale: min(calc(75vw / 393px), 0.72);
+    --phone-h-cap: 66vh;
+    --phone-scale: min(
+      calc(76vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(320px / 393px)
+    );
   }
 }
 
-@media (max-width: 480px) {
-  .feature {
-    --phone-scale: min(calc(74vw / 393px), 0.7);
+@supports (height: 1svh) {
+  @media (max-width: 767px) {
+    .hero {
+      --phone-h-cap: 68svh;
+    }
+
+    .story,
+    .feature {
+      --phone-h-cap: 66svh;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .hero {
+    --phone-h-cap: 62vh;
+    --phone-scale: min(
+      calc(84vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(286px / 393px)
+    );
   }
 
-  .hero,
-  .story {
+  .story,
+  .feature {
+    --phone-h-cap: 60vh;
     --phone-scale: min(
-      calc(74vw / 393px),
-      calc((100svh - 300px) / 852px),
-      0.76
+      calc(82vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(276px / 393px)
     );
+  }
+}
+
+@supports (height: 1svh) {
+  @media (max-width: 360px) {
+    .hero {
+      --phone-h-cap: 62svh;
+    }
+
+    .story,
+    .feature {
+      --phone-h-cap: 60svh;
+    }
+  }
+}
+
+@media (max-width: 899px) and (max-height: 560px) {
+  .hero {
+    --phone-h-cap: 52vh;
+    --phone-scale: min(
+      calc(70vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(260px / 393px)
+    );
+  }
+
+  .story,
+  .feature {
+    --phone-h-cap: 50vh;
+    --phone-scale: min(
+      calc(68vw / 393px),
+      calc(var(--phone-h-cap) / 852px),
+      calc(240px / 393px)
+    );
+  }
+}
+
+@supports (height: 1svh) {
+  @media (max-width: 899px) and (max-height: 560px) {
+    .hero {
+      --phone-h-cap: 52svh;
+    }
+
+    .story,
+    .feature {
+      --phone-h-cap: 50svh;
+    }
   }
 }
 

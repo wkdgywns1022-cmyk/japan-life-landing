@@ -1,27 +1,17 @@
 .wrap {
   position: relative;
-  display: flex;
-  justify-content: center;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   max-width: 100%;
-  overflow: hidden;
-}
-
-.glow {
-  position: absolute;
-  width: 120%;
-  height: 70%;
-  left: 50%;
-  top: 45%;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse,
-    rgba(37, 99, 235, 0.08),
-    transparent 68%
-  );
-  pointer-events: none;
-  z-index: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  isolation: auto;
 }
 
 .layerHost {
@@ -30,6 +20,8 @@
   height: 100%;
   z-index: 1;
   overflow: hidden;
+  border-radius: inherit;
+  background: transparent;
 }
 
 .screenLayer {
@@ -38,16 +30,11 @@
   display: flex;
   flex-direction: column;
   will-change: transform, opacity, filter;
+  background: transparent;
 }
 
-@media (max-width: 767px) {
-  .glow {
-    width: 90%;
-    height: 55%;
-    opacity: 0.7;
-  }
-
+@media (max-width: 899px) {
   .screenLayer {
-    will-change: opacity;
+    will-change: opacity, transform;
   }
 }

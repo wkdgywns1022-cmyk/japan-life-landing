@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useReducedMotion } from "motion/react";
 import {
   IconDelivery,
   IconEmergency,
@@ -8,6 +10,7 @@ import {
   IconTranslate,
 } from "../icons";
 import { useLocale } from "../LocaleProvider";
+import { useFeatureDemo } from "../../phone/useFeatureDemo";
 import StatusBar from "./StatusBar";
 import BottomNav from "./BottomNav";
 import styles from "./LifeShortcutsScreen.module.css";
@@ -20,9 +23,45 @@ const ICONS = {
   services: { Icon: IconServices, fg: "#4f46e5", bg: "#eef2ff" },
 } as const;
 
-export default function LifeShortcutsScreen() {
+type Phase = "c0" | "c1" | "c2" | "c3" | "rest";
+
+const STEPS: { state: Phase; holdMs: number }[] = [
+  { state: "c0", holdMs: 2400 },
+  { state: "rest", holdMs: 600 },
+  { state: "c1", holdMs: 2400 },
+  { state: "rest", holdMs: 600 },
+  { state: "c2", holdMs: 2400 },
+  { state: "rest", holdMs: 600 },
+  { state: "c3", holdMs: 2400 },
+  { state: "rest", holdMs: 900 },
+];
+
+type Props = {
+  demo?: boolean;
+  enabled?: boolean;
+  paused?: boolean;
+};
+
+export default function LifeShortcutsScreen({
+  demo = false,
+  enabled = false, paused = false,
+}: Props) {
   const { t } = useLocale();
+  const reduceMotion = useReducedMotion();
   const s = t.phone.shortcuts;
+  const steps = useMemo(() => STEPS, []);
+
+  const phase = useFeatureDemo<Phase>({
+    enabled: Boolean(demo) && enabled,
+    paused,
+    reduceMotion,
+    steps,
+    initial: "rest",
+    startDelayMs: 850,
+  });
+
+  const activeIndex =
+    phase === "c0" ? 0 : phase === "c1" ? 1 : phase === "c2" ? 2 : phase === "c3" ? 3 : -1;
 
   return (
     <div className={styles.root}>
@@ -37,11 +76,15 @@ export default function LifeShortcutsScreen() {
         </header>
 
         <div className={styles.grid}>
-          {s.items.map((item) => {
+          {s.items.map((item, index) => {
             const meta = ICONS[item.id as keyof typeof ICONS] ?? ICONS.services;
             const { Icon, fg, bg } = meta;
+            const active = index === activeIndex;
             return (
-              <div key={item.id} className={styles.card}>
+              <div
+                key={item.id}
+                className={`${styles.card} ${active ? styles.cardActive : ""}`}
+              >
                 <span
                   className={styles.icon}
                   style={{ background: bg, color: fg }}

@@ -53,10 +53,6 @@
   pointer-events: none;
 }
 
-.mobilePhone {
-  display: none;
-}
-
 .step:first-child {
   min-height: 78vh;
   padding-top: 0.5rem;
@@ -67,53 +63,29 @@
   padding-bottom: 2rem;
 }
 
-@media (max-width: 899px) and (min-width: 768px) {
+/* Compact story stages — no giant empty vh regions */
+@media (max-width: 899px) {
   .step {
-    min-height: auto;
-    padding-block: 3rem;
-    align-items: flex-start;
-  }
-
-  .step:first-child,
-  .step:last-child {
-    min-height: auto;
-  }
-
-  .inner {
-    max-width: none;
-  }
-
-  .inactive {
-    pointer-events: auto;
-  }
-
-  .mobilePhone {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.75rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .step {
-    min-height: auto;
-    padding-block: 3.25rem;
+    min-height: 0;
+    height: auto;
+    padding-block: 64px;
     align-items: stretch;
   }
 
   .step:first-child,
   .step:last-child {
-    min-height: auto;
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
+    min-height: 0;
+    padding-top: 56px;
+    padding-bottom: 56px;
   }
 
-  .step + .step {
-    border-top: 1px solid rgba(228, 231, 236, 0.45);
+  .step:first-child {
+    padding-top: 40px;
   }
 
   .inner {
-    max-width: none;
+    max-width: 40rem;
+    margin-inline: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -121,34 +93,59 @@
   }
 
   .marker {
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.75rem;
   }
 
   .heading {
-    font-size: clamp(1.55rem, 6.2vw, 1.95rem);
-    max-width: 20.5rem;
+    font-size: clamp(1.55rem, 4.2vw, 2rem);
+    max-width: 34rem;
+    letter-spacing: -0.028em;
   }
 
   .body {
-    margin-top: 0.95rem;
-    max-width: 21rem;
-    gap: 0.75rem;
+    margin-top: 16px;
+    max-width: 34rem;
+    gap: 0.8rem;
   }
 
   .paragraph {
-    font-size: 1rem;
-    line-height: 1.6;
+    font-size: 1.015rem;
+    line-height: 1.65;
+    color: var(--lp-text-secondary);
   }
 
   .inactive {
     pointer-events: auto;
   }
+}
 
-  .mobilePhone {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 1.75rem;
-    overflow: hidden;
+@media (max-width: 767px) {
+  .step {
+    padding-block: 60px;
+  }
+
+  .step:first-child,
+  .step:last-child {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .step:first-child {
+    padding-top: 36px;
+  }
+
+  .heading {
+    font-size: clamp(1.5rem, 6vw, 1.875rem);
+    max-width: 20.5rem;
+  }
+
+  .body {
+    margin-top: 14px;
+    max-width: 22rem;
+  }
+
+  .paragraph {
+    font-size: 0.96875rem;
+    line-height: 1.62;
   }
 }

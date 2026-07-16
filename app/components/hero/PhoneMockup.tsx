@@ -91,14 +91,11 @@ export default function PhoneMockup() {
     }
   })();
 
-  const showHomeIndicator =
-    screen === "home" || screen === "checklist" || screen === "expense";
-
   return (
     <DeviceShell
       size="hero"
       floating
-      showHomeIndicator={showHomeIndicator}
+      showHomeIndicator
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
