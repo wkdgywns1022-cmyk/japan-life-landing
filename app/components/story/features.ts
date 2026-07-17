@@ -82,3 +82,6 @@ export function screenForStage(stage: StageId): PhoneScreenId {
 /** Explore CTA targets — one canonical page, layout-width chooses destination. */
 export const EXPLORE_HREF_DESKTOP = "#product-intro";
 export const EXPLORE_HREF_MOBILE = "#product-showcase";
+
+/** Primary contact CTA — opens inquiry modal (email shown inside). */
+export const CONTACT_EMAIL = "wkdgywns1022@gmail.com";

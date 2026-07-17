@@ -179,6 +179,15 @@ export type ShowcaseCopy = {
   swipeHint: string;
 };
 
+export type ContactModalCopy = {
+  title: string;
+  description: string;
+  emailLabel: string;
+  copy: string;
+  close: string;
+  toast: string;
+};
+
 export type Translations = {
   hero: HeroCopy;
   nav: NavCopy;
@@ -193,6 +202,7 @@ export type Translations = {
   finalCta: FinalCtaCopy;
   progress: ProgressCopy;
   showcase: ShowcaseCopy;
+  contactModal: ContactModalCopy;
   phone: {
     home: HomeCopy;
     checklist: ChecklistCopy;
@@ -257,7 +267,7 @@ export const translations: Record<Locale, Translations> = {
       subtitleLine1: "일본에서의 새로운 시작을 더 쉽고 편리하게",
       subtitleLine2: "행정 절차부터 생활 정보, 지출 관리까지",
       support: "필요한 모든 기능을 LifePass Japan 하나에 담았습니다",
-      ctaBeta: "베타 신청",
+      ctaBeta: "문의하기",
       ctaExplore: "기능 살펴보기",
       langAria: "언어 선택",
     },
@@ -291,7 +301,7 @@ export const translations: Record<Locale, Translations> = {
     finalCta: {
       heading: "일본 생활을 더 쉽고 편리하게",
       brand: "LifePass Japan",
-      cta: "베타 신청",
+      cta: "문의하기",
     },
     progress: {
       intro: "소개로 이동",
@@ -303,6 +313,15 @@ export const translations: Record<Locale, Translations> = {
     },
     showcase: {
       swipeHint: "좌우로 넘겨 기능을 확인하세요",
+    },
+    contactModal: {
+      title: "문의하기",
+      description:
+        "비즈니스 제휴, 협업 또는 기타 문의는 아래 이메일로 연락해 주세요.",
+      emailLabel: "이메일",
+      copy: "이메일 복사",
+      close: "닫기",
+      toast: "이메일이 복사되었습니다!",
     },
     phone: {
       home: {
@@ -464,7 +483,7 @@ export const translations: Record<Locale, Translations> = {
       subtitleLine1: "Make your new start in Japan easier and more convenient",
       subtitleLine2: "From paperwork to daily info and expenses —",
       support: "everything you need is in LifePass Japan",
-      ctaBeta: "Join the beta",
+      ctaBeta: "Contact",
       ctaExplore: "Explore features",
       langAria: "Select language",
     },
@@ -498,7 +517,7 @@ export const translations: Record<Locale, Translations> = {
     finalCta: {
       heading: "Make life in Japan easier",
       brand: "LifePass Japan",
-      cta: "Join the beta",
+      cta: "Contact",
     },
     progress: {
       intro: "Go to introduction",
@@ -510,6 +529,15 @@ export const translations: Record<Locale, Translations> = {
     },
     showcase: {
       swipeHint: "Swipe to explore features",
+    },
+    contactModal: {
+      title: "Business Inquiry",
+      description:
+        "For business partnerships, collaborations, or general inquiries, please contact us at the email address below.",
+      emailLabel: "Email",
+      copy: "Copy Email",
+      close: "Close",
+      toast: "Email copied!",
     },
     phone: {
       home: {
@@ -672,7 +700,7 @@ export const translations: Record<Locale, Translations> = {
       subtitleLine1: "日本での新しいスタートを、もっと簡単に",
       subtitleLine2: "行政手続きから生活情報、家計管理まで",
       support: "必要な機能を LifePass Japan ひとつにまとめました",
-      ctaBeta: "ベータに参加",
+      ctaBeta: "お問い合わせ",
       ctaExplore: "機能を見る",
       langAria: "言語を選択",
     },
@@ -706,7 +734,7 @@ export const translations: Record<Locale, Translations> = {
     finalCta: {
       heading: "日本での暮らしを、もっと簡単に",
       brand: "LifePass Japan",
-      cta: "ベータに参加",
+      cta: "お問い合わせ",
     },
     progress: {
       intro: "紹介へ移動",
@@ -718,6 +746,15 @@ export const translations: Record<Locale, Translations> = {
     },
     showcase: {
       swipeHint: "左右にスワイプして機能を確認",
+    },
+    contactModal: {
+      title: "お問い合わせ",
+      description:
+        "ビジネス提携・協業・その他のお問い合わせは、下記のメールアドレスまでご連絡ください。",
+      emailLabel: "メール",
+      copy: "メールアドレスをコピー",
+      close: "閉じる",
+      toast: "メールアドレスをコピーしました！",
     },
     phone: {
       home: {

@@ -159,6 +159,10 @@
   position: relative;
   z-index: 11;
   pointer-events: auto;
+  overflow: visible;
+  padding-block: 4px 16px;
+  padding-inline: 4px;
+  box-sizing: border-box;
 }
 
 .btnPrimary {
@@ -177,11 +181,18 @@
   letter-spacing: -0.015em;
   text-decoration: none;
   border: none;
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.28);
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.2),
+    0 2px 6px rgba(37, 99, 235, 0.12);
 }
 
 .btnPrimary:hover {
   background: var(--lp-primary-bright);
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.28),
+    0 4px 10px rgba(37, 99, 235, 0.16);
 }
 
 .btnSecondary {
@@ -331,11 +342,19 @@
   font-size: 1.0625rem;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.28);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.2),
+    0 2px 6px rgba(37, 99, 235, 0.12);
 }
 
 .finalButton:hover {
   background: var(--lp-primary-bright);
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.28),
+    0 4px 10px rgba(37, 99, 235, 0.16);
 }
 
 @media (min-width: 380px) and (max-width: 899px) {
@@ -418,7 +437,7 @@
     position: relative;
     z-index: 10;
     pointer-events: auto;
-    overflow-x: clip;
+    overflow: visible;
   }
 
   .heroCopy {
@@ -433,6 +452,7 @@
     opacity: 1;
     will-change: auto;
     pointer-events: auto;
+    overflow: visible;
   }
 
   .label {
@@ -448,6 +468,7 @@
     word-break: keep-all;
     overflow-wrap: normal;
     text-align: left;
+    overflow-x: clip;
   }
 
   .journey[data-locale="ko"] .headline {
@@ -499,6 +520,9 @@
     position: relative;
     z-index: 11;
     pointer-events: auto;
+    overflow: visible;
+    padding-block: 4px 16px;
+    padding-inline: 4px;
   }
 
   .btnPrimary,
@@ -518,7 +542,9 @@
 
   .btnPrimary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.34);
+    box-shadow:
+      0 10px 24px rgba(37, 99, 235, 0.28),
+      0 4px 10px rgba(37, 99, 235, 0.16);
   }
 
   .btnSecondary {
@@ -542,7 +568,9 @@
 
   .finalButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.34);
+    box-shadow:
+      0 10px 24px rgba(37, 99, 235, 0.28),
+      0 4px 10px rgba(37, 99, 235, 0.16);
   }
 }
 

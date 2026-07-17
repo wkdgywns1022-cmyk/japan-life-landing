@@ -11,6 +11,7 @@ import {
   IconLocation,
   IconPayments,
   IconPerson,
+  IconServices,
   IconSettings,
   IconSunny,
   IconToday,
@@ -178,14 +179,19 @@ export default function HomeScreen({ demo = false, enabled = false, paused = fal
 
         <p className={styles.sectionTitle}>{h.lifeShortcuts}</p>
 
-        <div className={styles.shortcuts}>
+        <div
+          className={styles.shortcuts}
+          role="list"
+          aria-label={h.lifeShortcuts}
+        >
           {[
             { title: t.phone.shortcuts.items[0].title, bg: "#fef3f2", fg: "#f04438", Icon: IconHospital },
             { title: t.phone.shortcuts.items[1].title, bg: "#fef3f2", fg: "#f04438", Icon: IconEmergency },
             { title: t.phone.shortcuts.items[2].title, bg: "#fff6ed", fg: "#f79009", Icon: IconDelivery },
             { title: t.phone.shortcuts.items[3].title, bg: "#eff4ff", fg: "#2563eb", Icon: IconTranslate },
+            { title: t.phone.shortcuts.items[4].title, bg: "#eef2ff", fg: "#4f46e5", Icon: IconServices },
           ].map(({ title, bg, fg, Icon }) => (
-            <div key={title} className={styles.shortcut}>
+            <div key={title} className={styles.shortcut} role="listitem">
               <span className={styles.shortcutIcon} style={{ background: bg, color: fg }}>
                 <Icon size={16} />
               </span>

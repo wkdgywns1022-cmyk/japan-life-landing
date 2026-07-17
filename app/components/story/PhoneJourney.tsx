@@ -17,6 +17,7 @@ import type { PhoneScreenId } from "../hero/i18n";
 import { useLocale } from "../hero/LocaleProvider";
 import LanguageSelector from "../hero/LanguageSelector";
 import { IconArrowRight } from "../hero/icons";
+import ContactModal from "../ContactModal";
 import DesktopExperience from "./DesktopExperience";
 import MobileProductShowcase from "./MobileProductShowcase";
 import StoryPhone from "./StoryPhone";
@@ -75,6 +76,7 @@ export default function PhoneJourney() {
   const [displayScreen, setDisplayScreen] = useState<PhoneScreenId>("home");
   const [heroNode, setHeroNode] = useState<HTMLElement | null>(null);
   const [activeFeatureIndex, setActiveFeatureIndex] = useState(-1);
+  const [contactOpen, setContactOpen] = useState(false);
   const activeStageRef = useRef<StageId>(HERO_ID);
 
   const rotateTimerRef = useRef<number | null>(null);
@@ -198,9 +200,13 @@ export default function PhoneJourney() {
         </p>
         <p className={styles.support}>{hero.support}</p>
         <div className={styles.actions}>
-          <a className={styles.btnPrimary} href="#beta">
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={() => setContactOpen(true)}
+          >
             {hero.ctaBeta}
-          </a>
+          </button>
           <a
             className={styles.btnSecondary}
             href={EXPLORE_HREF_DESKTOP}
@@ -278,7 +284,7 @@ export default function PhoneJourney() {
       ) : null}
 
       <div
-        id="beta"
+        id="contact"
         className={styles.finalCta}
         data-active={
           activeFeatureIndex === PRODUCT_FEATURES.length - 1 ? "near" : ""
@@ -293,11 +299,20 @@ export default function PhoneJourney() {
         >
           <p className={styles.finalHeading}>{cta.heading}</p>
           <p className={styles.finalBrand}>{cta.brand}</p>
-          <a className={styles.finalButton} href="#beta">
+          <button
+            type="button"
+            className={styles.finalButton}
+            onClick={() => setContactOpen(true)}
+          >
             {cta.cta}
-          </a>
+          </button>
         </motion.div>
       </div>
+
+      <ContactModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
     </div>
   );
 }

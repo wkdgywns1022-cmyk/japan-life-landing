@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Noto_Sans, Noto_Sans_JP, Noto_Sans_KR } from "next/font/google";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import PhoneMockup from "./PhoneMockup";
 import LanguageSelector from "./LanguageSelector";
 import { useLocale } from "./LocaleProvider";
 import { IconArrowRight } from "./icons";
+import ContactModal from "../ContactModal";
 import styles from "./Hero.module.css";
 
 const notoSans = Noto_Sans({
@@ -32,6 +34,7 @@ export default function Hero() {
   const reduceMotion = useReducedMotion();
   const { locale, t } = useLocale();
   const hero = t.hero;
+  const [contactOpen, setContactOpen] = useState(false);
 
   const fontClass =
     locale === "ja"
@@ -88,9 +91,13 @@ export default function Hero() {
               <p className={styles.support}>{hero.support}</p>
 
               <div className={styles.actions}>
-                <a className={styles.btnPrimary} href="#beta">
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={() => setContactOpen(true)}
+                >
                   {hero.ctaBeta}
-                </a>
+                </button>
                 <a className={styles.btnSecondary} href="#product-intro">
                   <span className={styles.btnSecondaryText}>
                     {hero.ctaExplore}
@@ -113,6 +120,11 @@ export default function Hero() {
           <PhoneMockup />
         </motion.div>
       </div>
+
+      <ContactModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
     </section>
   );
 }
