@@ -127,11 +127,19 @@
   display: grid;
   place-items: center;
   margin-inline: auto;
-  padding-inline: 0;
+  padding-inline: 36px;
   position: relative;
   box-sizing: border-box;
   min-height: 0;
   overflow: visible;
+}
+
+.phoneWithHints {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .phoneMockup {
@@ -156,6 +164,63 @@
   left: auto;
   right: auto;
   transform: none;
+}
+
+.swipeHintArrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(248, 251, 255, 0.72);
+  color: color-mix(in srgb, var(--lp-primary) 55%, var(--lp-text-tertiary));
+  pointer-events: none;
+  user-select: none;
+}
+
+.swipeHintLeft {
+  right: calc(100% + 8px);
+  left: auto;
+  transform: translateY(-50%);
+  animation: swipeHintPulseLeft 2.2s ease-in-out infinite alternate;
+}
+
+.swipeHintRight {
+  left: calc(100% + 8px);
+  right: auto;
+  transform: translateY(-50%);
+  animation: swipeHintPulseRight 2.2s ease-in-out infinite alternate;
+}
+
+.swipeHintStatic {
+  animation: none;
+  opacity: 0.4;
+  transform: translateY(-50%);
+}
+
+@keyframes swipeHintPulseLeft {
+  from {
+    opacity: 0.25;
+    transform: translate(-5px, -50%);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(0, -50%);
+  }
+}
+
+@keyframes swipeHintPulseRight {
+  from {
+    opacity: 0.25;
+    transform: translate(5px, -50%);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(0, -50%);
+  }
 }
 
 .controls {
@@ -234,5 +299,12 @@
 @media (prefers-reduced-motion: reduce) {
   .phoneMockup {
     transition: none;
+  }
+
+  .swipeHintLeft,
+  .swipeHintRight {
+    animation: none;
+    opacity: 0.4;
+    transform: translateY(-50%);
   }
 }

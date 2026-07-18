@@ -99,6 +99,14 @@ export function IconChevron(props: IconProps) {
   );
 }
 
+export function IconChevronLeft(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M15 6l-6 6 6 6" />
+    </Icon>
+  );
+}
+
 export function IconEmergency(props: IconProps) {
   return (
     <Icon {...props}>

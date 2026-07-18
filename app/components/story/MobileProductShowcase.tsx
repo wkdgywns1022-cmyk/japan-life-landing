@@ -9,6 +9,7 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocale } from "../hero/LocaleProvider";
+import { IconChevron, IconChevronLeft } from "../hero/icons";
 import type { ProductFeature } from "./features";
 import ProgressDots from "./ProgressDots";
 import StoryPhone from "./StoryPhone";
@@ -24,6 +25,10 @@ const appleEase = [0.22, 1, 0.36, 1] as const;
 const SWIPE_THRESHOLD_PX = 48;
 const TRANSITION_MS = 560;
 const DEMO_START_DELAY_MS = 520;
+const SWIPE_ARROW_AUTO_HIDE_MS = 6000;
+
+/** Session-scoped: once dismissed, stay hidden until full page reload. */
+let swipeArrowsDismissedSession = false;
 
 /**
  * Mobile showcase (<900px): fit-to-viewport composition + pointer swipe + direct dots.
@@ -39,6 +44,9 @@ export default function MobileProductShowcase({ features }: Props) {
   const [demoReady, setDemoReady] = useState(true);
   const [dragX, setDragX] = useState(0);
   const [showHint, setShowHint] = useState(true);
+  const [showSwipeArrows, setShowSwipeArrows] = useState(
+    () => !swipeArrowsDismissedSession,
+  );
 
   const activeIndexRef = useRef(0);
   const transitionIdRef = useRef(0);
@@ -62,9 +70,23 @@ export default function MobileProductShowcase({ features }: Props) {
     return id;
   }, []);
 
+  const dismissSwipeArrows = useCallback(() => {
+    swipeArrowsDismissedSession = true;
+    setShowSwipeArrows(false);
+    setShowHint(false);
+  }, []);
+
   useEffect(() => {
     return () => clearTimers();
   }, [clearTimers]);
+
+  useEffect(() => {
+    if (!showSwipeArrows) return;
+    const id = window.setTimeout(() => {
+      dismissSwipeArrows();
+    }, SWIPE_ARROW_AUTO_HIDE_MS);
+    return () => window.clearTimeout(id);
+  }, [showSwipeArrows, dismissSwipeArrows]);
 
   const goToFeature = useCallback(
     (targetIndex: number, source: NavigationSource) => {
@@ -79,7 +101,7 @@ export default function MobileProductShowcase({ features }: Props) {
       setNavigationSource(source);
       setTransitioning(true);
 
-      if (source === "swipe") setShowHint(false);
+      if (source === "swipe") dismissSwipeArrows();
 
       activeIndexRef.current = clamped;
       setActiveIndex(clamped);
@@ -94,7 +116,13 @@ export default function MobileProductShowcase({ features }: Props) {
         }, reduceMotion ? 0 : Math.max(0, DEMO_START_DELAY_MS - settleMs));
       }, settleMs);
     },
-    [features.length, clearTimers, schedule, reduceMotion],
+    [
+      features.length,
+      clearTimers,
+      schedule,
+      reduceMotion,
+      dismissSwipeArrows,
+    ],
   );
 
   const onDotSelect = useCallback(
@@ -188,7 +216,6 @@ export default function MobileProductShowcase({ features }: Props) {
   const text = t.sections[feature.sectionKey];
   const marker = String(activeIndex + 1).padStart(2, "0");
   const lines = text.heading.split("\n");
-  // Compact body: keep paragraph breaks, collapse soft newlines to spaces
   const bodyBlocks = text.body.split("\n\n").map((block) =>
     block.split("\n").join(" "),
   );
@@ -266,16 +293,37 @@ export default function MobileProductShowcase({ features }: Props) {
         </div>
 
         <div className={styles.phoneStage}>
-          <div
-            className={styles.phoneMockup}
-            style={dragX ? { transform: `translateX(${dragX}px)` } : undefined}
-          >
-            <StoryPhone
-              screen={feature.screen}
-              demoActive={demoActive}
-              size="showcase"
-              motionPreset="mobileShowcase"
-            />
+          <div className={styles.phoneWithHints}>
+            {showSwipeArrows ? (
+              <>
+                <div
+                  className={`${styles.swipeHintArrow} ${styles.swipeHintLeft} ${reduced ? styles.swipeHintStatic : ""}`}
+                  aria-hidden="true"
+                >
+                  <IconChevronLeft size={18} />
+                </div>
+                <div
+                  className={`${styles.swipeHintArrow} ${styles.swipeHintRight} ${reduced ? styles.swipeHintStatic : ""}`}
+                  aria-hidden="true"
+                >
+                  <IconChevron size={18} />
+                </div>
+              </>
+            ) : null}
+
+            <div
+              className={styles.phoneMockup}
+              style={
+                dragX ? { transform: `translateX(${dragX}px)` } : undefined
+              }
+            >
+              <StoryPhone
+                screen={feature.screen}
+                demoActive={demoActive}
+                size="showcase"
+                motionPreset="mobileShowcase"
+              />
+            </div>
           </div>
         </div>
 
